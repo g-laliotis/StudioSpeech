@@ -2,11 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os/exec"
-	"runtime"
-	"strings"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"studiospeech/internal/agents"
 )
 
 // checkCmd represents the check command
@@ -31,110 +30,79 @@ func runCheck(cmd *cobra.Command, args []string) {
 	fmt.Println("🔍 StudioSpeech System Check")
 	fmt.Println("============================")
 	
-	// Check Go version
-	fmt.Printf("Go version: %s\n", runtime.Version())
-	fmt.Printf("OS/Arch: %s/%s\n\n", runtime.GOOS, runtime.GOARCH)
+	// Initialize environment agent
+	envAgent := agents.NewEnvironmentAgent()
+	envInfo, err := envAgent.Check()
+	if err != nil {
+		fmt.Printf("❌ Environment check failed: %v\n", err)
+		return
+	}
+	
+	// Display system info
+	fmt.Printf("Go version: %s\n", envInfo.GoVersion)
+	fmt.Printf("OS/Arch: %s/%s\n\n", envInfo.OS, envInfo.Arch)
 	
 	// Check Piper TTS
-	checkPiper()
+	if envInfo.HasPiper {
+		fmt.Printf("Checking Piper TTS... ✅ Found: %s\n", envInfo.PiperVersion)
+	} else {
+		fmt.Println("Checking Piper TTS... ❌ NOT FOUND")
+	}
 	
 	// Check FFmpeg
-	checkFFmpeg()
+	if envInfo.HasFFmpeg {
+		fmt.Printf("Checking FFmpeg... ✅ Found: FFmpeg %s\n", envInfo.FFmpegVersion)
+	} else {
+		fmt.Println("Checking FFmpeg... ❌ NOT FOUND")
+	}
 	
 	// Check voice catalog
-	checkVoices()
+	checkVoiceCatalog()
 	
-	fmt.Println("\n✅ System check complete!")
-}
-
-// checkPiper verifies Piper TTS installation
-func checkPiper() {
-	fmt.Print("Checking Piper TTS... ")
-	
-	cmd := exec.Command("piper", "--version")
-	output, err := cmd.Output()
-	
-	if err != nil {
-		fmt.Println("❌ NOT FOUND")
-		printPiperInstallGuide()
-		return
+	// Show installation guide for missing components
+	var missing []string
+	if !envInfo.HasPiper {
+		missing = append(missing, "piper")
+	}
+	if !envInfo.HasFFmpeg {
+		missing = append(missing, "ffmpeg")
 	}
 	
-	version := strings.TrimSpace(string(output))
-	fmt.Printf("✅ Found: %s\n", version)
-}
-
-// checkFFmpeg verifies FFmpeg installation
-func checkFFmpeg() {
-	fmt.Print("Checking FFmpeg... ")
-	
-	cmd := exec.Command("ffmpeg", "-version")
-	output, err := cmd.Output()
-	
-	if err != nil {
-		fmt.Println("❌ NOT FOUND")
-		printFFmpegInstallGuide()
-		return
+	if len(missing) > 0 {
+		fmt.Println("\n" + envAgent.GetInstallGuide(missing))
 	}
 	
-	// Extract version from first line
-	lines := strings.Split(string(output), "\n")
-	if len(lines) > 0 {
-		version := strings.Fields(lines[0])
-		if len(version) >= 3 {
-			fmt.Printf("✅ Found: %s %s\n", version[0], version[2])
-		} else {
-			fmt.Println("✅ Found: FFmpeg (version unknown)")
-		}
-	}
+	fmt.Println("✅ System check complete!")
 }
 
-// checkVoices validates voice catalog
-func checkVoices() {
+// checkVoiceCatalog validates the voice catalog
+func checkVoiceCatalog() {
 	fmt.Print("Checking voice catalog... ")
-	// TODO: Implement voice catalog validation
-	fmt.Println("⚠️  Voice catalog validation not yet implemented")
-}
-
-// printPiperInstallGuide provides OS-specific installation instructions for Piper
-func printPiperInstallGuide() {
-	fmt.Println("\n📋 Piper TTS Installation Guide:")
 	
-	switch runtime.GOOS {
-	case "darwin": // macOS
-		fmt.Println("  macOS:")
-		fmt.Println("    brew install piper-tts")
-		fmt.Println("  Or download from: https://github.com/rhasspy/piper/releases")
-		
-	case "windows":
-		fmt.Println("  Windows:")
-		fmt.Println("    choco install piper-tts")
-		fmt.Println("  Or download from: https://github.com/rhasspy/piper/releases")
-		
-	default:
-		fmt.Println("  Linux:")
-		fmt.Println("    Download from: https://github.com/rhasspy/piper/releases")
-		fmt.Println("    Extract and add to PATH")
+	// Initialize voice catalog agent
+	catalogPath := filepath.Join("voices", "catalog.json")
+	voiceAgent := agents.NewVoiceCatalogAgent(catalogPath)
+	
+	// Load and validate catalog
+	if err := voiceAgent.LoadCatalog(); err != nil {
+		fmt.Printf("❌ FAILED: %v\n", err)
+		return
 	}
-}
-
-// printFFmpegInstallGuide provides OS-specific installation instructions for FFmpeg
-func printFFmpegInstallGuide() {
-	fmt.Println("\n📋 FFmpeg Installation Guide:")
 	
-	switch runtime.GOOS {
-	case "darwin": // macOS
-		fmt.Println("  macOS:")
-		fmt.Println("    brew install ffmpeg")
-		
-	case "windows":
-		fmt.Println("  Windows:")
-		fmt.Println("    choco install ffmpeg")
-		fmt.Println("  Or download from: https://ffmpeg.org/download.html")
-		
-	default:
-		fmt.Println("  Linux:")
-		fmt.Println("    sudo apt install ffmpeg  # Ubuntu/Debian")
-		fmt.Println("    sudo yum install ffmpeg  # CentOS/RHEL")
+	voices := voiceAgent.GetAvailableVoices()
+	fmt.Printf("✅ Found %d commercial-safe voices\n", len(voices))
+	
+	// Display available voices
+	for _, voice := range voices {
+		fmt.Printf("  - %s (%s, %s)\n", voice.ID, voice.Language, voice.Style)
+	}
+	
+	// Show attribution requirements
+	attributions := voiceAgent.GetAttributionText()
+	if len(attributions) > 0 {
+		fmt.Println("\n📝 Attribution Required:")
+		for _, attr := range attributions {
+			fmt.Printf("  %s\n", attr)
+		}
 	}
 }

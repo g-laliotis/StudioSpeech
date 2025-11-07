@@ -7,7 +7,7 @@ import (
 
 func TestNormalizeAgent_CleanText(t *testing.T) {
 	agent := NewNormalizeAgent()
-	
+
 	tests := []struct {
 		input    string
 		expected string
@@ -25,7 +25,7 @@ func TestNormalizeAgent_CleanText(t *testing.T) {
 			expected: "Multiple spaces here",
 		},
 	}
-	
+
 	for _, test := range tests {
 		result := agent.cleanText(test.input)
 		if result != test.expected {
@@ -36,7 +36,7 @@ func TestNormalizeAgent_CleanText(t *testing.T) {
 
 func TestNormalizeAgent_ExpandAbbreviations(t *testing.T) {
 	agent := NewNormalizeAgent()
-	
+
 	tests := []struct {
 		input    string
 		language string
@@ -53,11 +53,11 @@ func TestNormalizeAgent_ExpandAbbreviations(t *testing.T) {
 			expected: "Το κείμενο και λοιπά είναι εδώ.",
 		},
 	}
-	
+
 	for _, test := range tests {
 		result := agent.expandAbbreviations(test.input, test.language)
 		if result != test.expected {
-			t.Errorf("expandAbbreviations(%q, %q) = %q, want %q", 
+			t.Errorf("expandAbbreviations(%q, %q) = %q, want %q",
 				test.input, test.language, result, test.expected)
 		}
 	}
@@ -65,7 +65,7 @@ func TestNormalizeAgent_ExpandAbbreviations(t *testing.T) {
 
 func TestNormalizeAgent_ExpandNumbers(t *testing.T) {
 	agent := NewNormalizeAgent()
-	
+
 	tests := []struct {
 		input    string
 		language string
@@ -82,11 +82,11 @@ func TestNormalizeAgent_ExpandNumbers(t *testing.T) {
 			expected: "Έχω τρία μήλα και επτά πορτοκάλια.",
 		},
 	}
-	
+
 	for _, test := range tests {
 		result := agent.expandNumbers(test.input, test.language)
 		if result != test.expected {
-			t.Errorf("expandNumbers(%q, %q) = %q, want %q", 
+			t.Errorf("expandNumbers(%q, %q) = %q, want %q",
 				test.input, test.language, result, test.expected)
 		}
 	}
@@ -94,7 +94,7 @@ func TestNormalizeAgent_ExpandNumbers(t *testing.T) {
 
 func TestNormalizeAgent_Normalize(t *testing.T) {
 	agent := NewNormalizeAgent()
-	
+
 	content := &TextContent{
 		Paragraphs: []string{
 			"Hello Dr. Smith. I have 5 apples.",
@@ -103,26 +103,26 @@ func TestNormalizeAgent_Normalize(t *testing.T) {
 		Language:  "en-US",
 		WordCount: 12,
 	}
-	
+
 	result, err := agent.Normalize(content)
 	if err != nil {
 		t.Fatalf("Normalize failed: %v", err)
 	}
-	
+
 	if len(result.Sentences) == 0 {
 		t.Error("No sentences produced")
 	}
-	
+
 	if result.Language != "en-US" {
 		t.Errorf("Expected language en-US, got %s", result.Language)
 	}
-	
+
 	// Check that abbreviations and numbers were expanded
 	allText := strings.Join(result.Sentences, " ")
 	if !strings.Contains(allText, "Doctor") {
 		t.Error("Dr. was not expanded to Doctor")
 	}
-	
+
 	if !strings.Contains(allText, "five") {
 		t.Error("5 was not expanded to five")
 	}

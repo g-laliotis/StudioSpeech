@@ -34,7 +34,7 @@ func Execute() {
 func init() {
 	// Global flags can be added here
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
-	
+
 	// Add version command
 	versionCmd := &cobra.Command{
 		Use:   "version",

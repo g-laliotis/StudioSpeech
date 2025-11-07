@@ -23,7 +23,7 @@ func (m *MacOSTTSAgent) IsAvailable() bool {
 	if runtime.GOOS != "darwin" {
 		return false
 	}
-	
+
 	// Check if 'say' command exists
 	_, err := exec.LookPath("say")
 	return err == nil
@@ -34,20 +34,20 @@ func (m *MacOSTTSAgent) Synthesize(text, outputPath, gender, language string) er
 	if !m.IsAvailable() {
 		return fmt.Errorf("macOS TTS not available")
 	}
-	
+
 	// Select voice based on gender and language
 	voice := m.selectVoice(gender, language)
-	
+
 	// Generate to AIFF first (macOS native format) with natural speech rate
 	aiffPath := outputPath + ".aiff"
 	rate := m.calculateSpeechRate(language)
 	cmd := exec.Command("say", "-v", voice, "-r", fmt.Sprintf("%.0f", rate), "-o", aiffPath, text)
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("macOS TTS failed: %w\nOutput: %s", err, string(output))
 	}
-	
+
 	// Convert AIFF to WAV using ffmpeg (if available)
 	if _, err := exec.LookPath("ffmpeg"); err == nil {
 		convertCmd := exec.Command("ffmpeg", "-i", aiffPath, "-y", outputPath)
@@ -57,7 +57,7 @@ func (m *MacOSTTSAgent) Synthesize(text, outputPath, gender, language string) er
 			return nil
 		}
 	}
-	
+
 	// If conversion fails, just rename AIFF to output path
 	exec.Command("mv", aiffPath, outputPath).Run()
 	return nil
@@ -67,17 +67,17 @@ func (m *MacOSTTSAgent) Synthesize(text, outputPath, gender, language string) er
 func (m *MacOSTTSAgent) selectVoice(gender, language string) string {
 	// Check for Greek language
 	if language == "el-GR" {
-		return "Melina"  // Greek female voice
+		return "Melina" // Greek female voice
 	}
-	
+
 	// Default to English voices
 	switch gender {
 	case "male":
-		return "Alex"  // Default male voice
+		return "Alex" // Default male voice
 	case "female":
-		return "Samantha"  // Default female voice
+		return "Samantha" // Default female voice
 	default:
-		return "Samantha"  // Default to female
+		return "Samantha" // Default to female
 	}
 }
 
@@ -86,9 +86,9 @@ func (m *MacOSTTSAgent) calculateSpeechRate(language string) float64 {
 	// Slower rate for better pronunciation and natural pauses
 	switch language {
 	case "el-GR":
-		return 160  // Slightly slower for Greek
+		return 160 // Slightly slower for Greek
 	default:
-		return 175  // Natural English rate
+		return 175 // Natural English rate
 	}
 }
 
@@ -99,7 +99,7 @@ func (m *MacOSTTSAgent) GetAvailableVoices() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get voices: %w", err)
 	}
-	
+
 	// Parse voice list (simplified)
 	return []string{"Alex (male)", "Samantha (female)", "Victoria (female)"}, nil
 }

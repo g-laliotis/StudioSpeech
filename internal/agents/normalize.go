@@ -67,20 +67,20 @@ func (n *NormalizeAgent) Normalize(content *TextContent) (*NormalizedText, error
 	}
 
 	var allSentences []string
-	
+
 	for _, paragraph := range content.Paragraphs {
 		// Clean and normalize the paragraph
 		cleaned := n.cleanText(paragraph)
-		
+
 		// Expand abbreviations based on language
 		expanded := n.expandAbbreviations(cleaned, content.Language)
-		
+
 		// Expand numbers to words
 		withNumbers := n.expandNumbers(expanded, content.Language)
-		
+
 		// Split into sentences
 		sentences := n.splitIntoSentences(withNumbers)
-		
+
 		allSentences = append(allSentences, sentences...)
 	}
 
@@ -90,7 +90,7 @@ func (n *NormalizeAgent) Normalize(content *TextContent) (*NormalizedText, error
 		Metadata: map[string]interface{}{
 			"original_paragraphs": len(content.Paragraphs),
 			"total_sentences":     len(allSentences),
-			"word_count":         content.WordCount,
+			"word_count":          content.WordCount,
 		},
 	}, nil
 }
@@ -100,47 +100,47 @@ func (n *NormalizeAgent) cleanText(text string) string {
 	// Normalize dashes
 	text = strings.ReplaceAll(text, "—", " - ")
 	text = strings.ReplaceAll(text, "–", " - ")
-	
+
 	// Normalize multiple spaces
 	spaceRegex := regexp.MustCompile(`\s+`)
 	text = spaceRegex.ReplaceAllString(text, " ")
-	
+
 	return strings.TrimSpace(text)
 }
 
 // expandAbbreviations replaces common abbreviations with full words
 func (n *NormalizeAgent) expandAbbreviations(text, language string) string {
 	var abbrevs map[string]string
-	
+
 	switch language {
 	case "el-GR":
 		abbrevs = n.greekAbbrevs
 	default:
 		abbrevs = n.englishAbbrevs
 	}
-	
+
 	for abbrev, expansion := range abbrevs {
 		// Simple string replacement for abbreviations
 		text = strings.ReplaceAll(text, abbrev, expansion)
 	}
-	
+
 	return text
 }
 
 // expandNumbers converts digits to words for better pronunciation
 func (n *NormalizeAgent) expandNumbers(text, language string) string {
 	var numbers map[string]string
-	
+
 	switch language {
 	case "el-GR":
 		numbers = n.greekNumbers
 	default:
 		numbers = n.englishNumbers
 	}
-	
+
 	// Find standalone numbers (not part of larger numbers or dates)
 	numberRegex := regexp.MustCompile(`\b(\d{1,2})\b`)
-	
+
 	text = numberRegex.ReplaceAllStringFunc(text, func(match string) string {
 		num := strings.TrimSpace(match)
 		if expansion, exists := numbers[num]; exists {
@@ -148,7 +148,7 @@ func (n *NormalizeAgent) expandNumbers(text, language string) string {
 		}
 		return match // Keep original if no expansion found
 	})
-	
+
 	return text
 }
 
@@ -156,13 +156,13 @@ func (n *NormalizeAgent) expandNumbers(text, language string) string {
 func (n *NormalizeAgent) splitIntoSentences(text string) []string {
 	// Enhanced sentence splitting with better punctuation handling
 	sentenceRegex := regexp.MustCompile(`([.!?]+)\s+`)
-	
+
 	// Split while preserving punctuation
 	parts := sentenceRegex.Split(text, -1)
 	punctuation := sentenceRegex.FindAllString(text, -1)
-	
+
 	var sentences []string
-	
+
 	for i, part := range parts {
 		sentence := strings.TrimSpace(part)
 		if sentence != "" {
@@ -172,19 +172,19 @@ func (n *NormalizeAgent) splitIntoSentences(text string) []string {
 				sentence += origPunct
 			} else {
 				// Ensure sentence ends with punctuation
-				if !strings.HasSuffix(sentence, ".") && 
-				   !strings.HasSuffix(sentence, "!") && 
-				   !strings.HasSuffix(sentence, "?") {
+				if !strings.HasSuffix(sentence, ".") &&
+					!strings.HasSuffix(sentence, "!") &&
+					!strings.HasSuffix(sentence, "?") {
 					sentence += "."
 				}
 			}
-			
+
 			// Add prosody improvements
 			sentence = n.improveProsody(sentence)
 			sentences = append(sentences, sentence)
 		}
 	}
-	
+
 	return sentences
 }
 
@@ -192,17 +192,17 @@ func (n *NormalizeAgent) splitIntoSentences(text string) []string {
 func (n *NormalizeAgent) improveProsody(sentence string) string {
 	// Add pauses after commas for better rhythm
 	sentence = regexp.MustCompile(`,\s*`).ReplaceAllString(sentence, ", ")
-	
+
 	// Add emphasis on colons and semicolons
 	sentence = regexp.MustCompile(`:\s*`).ReplaceAllString(sentence, ": ")
 	sentence = regexp.MustCompile(`;\s*`).ReplaceAllString(sentence, "; ")
-	
+
 	// Handle parenthetical expressions
 	sentence = regexp.MustCompile(`\(([^)]+)\)`).ReplaceAllString(sentence, " ($1) ")
-	
+
 	// Clean up multiple spaces
 	sentence = regexp.MustCompile(`\s+`).ReplaceAllString(sentence, " ")
-	
+
 	return strings.TrimSpace(sentence)
 }
 
@@ -210,7 +210,7 @@ func (n *NormalizeAgent) improveProsody(sentence string) string {
 func (n *NormalizeAgent) ProcessPauseMarkup(text string) string {
 	// Convert pause markup to sentence breaks for Piper
 	pauseRegex := regexp.MustCompile(`\[PAUSE=(\d+)ms\]`)
-	
+
 	return pauseRegex.ReplaceAllStringFunc(text, func(match string) string {
 		// Extract duration
 		matches := pauseRegex.FindStringSubmatch(match)
@@ -233,21 +233,21 @@ func (n *NormalizeAgent) ValidateNormalizedText(normalized *NormalizedText) erro
 	if normalized == nil {
 		return fmt.Errorf("normalized text is nil")
 	}
-	
+
 	if len(normalized.Sentences) == 0 {
 		return fmt.Errorf("no sentences found after normalization")
 	}
-	
+
 	// Check for reasonable sentence lengths
 	for i, sentence := range normalized.Sentences {
 		if len(sentence) > 1500 {
 			return fmt.Errorf("sentence %d too long: %d characters (max 1500)", i, len(sentence))
 		}
-		
+
 		if strings.TrimSpace(sentence) == "" {
 			return fmt.Errorf("sentence %d is empty", i)
 		}
 	}
-	
+
 	return nil
 }

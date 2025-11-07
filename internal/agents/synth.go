@@ -13,19 +13,19 @@ import (
 
 // SynthParams contains synthesis parameters
 type SynthParams struct {
-	Speed    float64 // Speech speed multiplier (0.5-2.0)
-	Noise    float64 // Noise level for naturalness (0.0-1.0)
-	NoiseW   float64 // Noise width for variation (0.0-1.0)
-	Speaker  int     // Speaker ID for multi-speaker models
+	Speed   float64 // Speech speed multiplier (0.5-2.0)
+	Noise   float64 // Noise level for naturalness (0.0-1.0)
+	NoiseW  float64 // Noise width for variation (0.0-1.0)
+	Speaker int     // Speaker ID for multi-speaker models
 }
 
 // SynthResult contains synthesis output information
 type SynthResult struct {
-	OutputPath   string
-	Duration     time.Duration
-	SampleRate   int
-	Channels     int
-	FileSize     int64
+	OutputPath string
+	Duration   time.Duration
+	SampleRate int
+	Channels   int
+	FileSize   int64
 }
 
 // SynthAgent handles text-to-speech synthesis using Piper
@@ -54,36 +54,36 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 	if normalized == nil {
 		return nil, fmt.Errorf("normalized text is nil")
 	}
-	
+
 	if voice == nil {
 		return nil, fmt.Errorf("voice is nil")
 	}
-	
+
 	if params == nil {
 		params = s.getDefaultParams()
 	}
-	
+
 	// Validate parameters
 	if err := s.validateParams(params); err != nil {
 		return nil, fmt.Errorf("invalid synthesis parameters: %w", err)
 	}
-	
+
 	// Check if voice model file exists (skip in dry-run mode)
 	if !s.dryRun {
 		if _, err := os.Stat(voice.Path); os.IsNotExist(err) {
 			return nil, fmt.Errorf("voice model file not found: %s", voice.Path)
 		}
 	}
-	
+
 	// Create temporary output file
 	outputPath := filepath.Join(s.tempDir, fmt.Sprintf("synth_%d.wav", time.Now().UnixNano()))
-	
+
 	// Combine all sentences into single text
 	text := strings.Join(normalized.Sentences, " ")
-	
+
 	// Build Piper command
 	cmd := s.buildPiperCommand(voice.Path, outputPath, params)
-	
+
 	if s.dryRun {
 		// Return command for testing without execution
 		return &SynthResult{
@@ -94,10 +94,10 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 			FileSize:   0,
 		}, nil
 	}
-	
+
 	// Execute Piper synthesis
 	startTime := time.Now()
-	
+
 	// Try Piper first, fallback to macOS TTS if Piper fails
 	err := s.executePiper(cmd, text)
 	if err != nil {
@@ -115,15 +115,15 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 			return nil, fmt.Errorf("piper synthesis failed and no fallback available: %w", err)
 		}
 	}
-	
+
 	duration := time.Since(startTime)
-	
+
 	// Get output file info
 	fileInfo, err := os.Stat(outputPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get output file info: %w", err)
 	}
-	
+
 	return &SynthResult{
 		OutputPath: outputPath,
 		Duration:   duration,
@@ -139,20 +139,20 @@ func (s *SynthAgent) buildPiperCommand(modelPath, outputPath string, params *Syn
 		"--model", modelPath,
 		"--output_file", outputPath,
 	}
-	
+
 	// Convert speed to length_scale (inverse relationship)
 	lengthScale := 1.0 / params.Speed
 	args = append(args, "--length_scale", fmt.Sprintf("%.3f", lengthScale))
-	
+
 	// Add noise parameters
 	args = append(args, "--noise_scale", fmt.Sprintf("%.3f", params.Noise))
 	args = append(args, "--noise_w", fmt.Sprintf("%.3f", params.NoiseW))
-	
+
 	// Add speaker if specified
 	if params.Speaker > 0 {
 		args = append(args, "--speaker", strconv.Itoa(params.Speaker))
 	}
-	
+
 	return exec.Command(s.piperPath, args...)
 }
 
@@ -163,23 +163,23 @@ func (s *SynthAgent) executePiper(cmd *exec.Cmd, text string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create stdin pipe: %w", err)
 	}
-	
+
 	// Start the command
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start piper: %w", err)
 	}
-	
+
 	// Write text to stdin
 	go func() {
 		defer stdin.Close()
 		io.WriteString(stdin, text)
 	}()
-	
+
 	// Wait for completion
 	if err := cmd.Wait(); err != nil {
 		return fmt.Errorf("piper execution failed: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -198,19 +198,19 @@ func (s *SynthAgent) validateParams(params *SynthParams) error {
 	if params.Speed < 0.5 || params.Speed > 2.0 {
 		return fmt.Errorf("speed must be between 0.5 and 2.0, got %.2f", params.Speed)
 	}
-	
+
 	if params.Noise < 0.0 || params.Noise > 1.0 {
 		return fmt.Errorf("noise must be between 0.0 and 1.0, got %.3f", params.Noise)
 	}
-	
+
 	if params.NoiseW < 0.0 || params.NoiseW > 1.0 {
 		return fmt.Errorf("noiseW must be between 0.0 and 1.0, got %.3f", params.NoiseW)
 	}
-	
+
 	if params.Speaker < 0 {
 		return fmt.Errorf("speaker must be >= 0, got %d", params.Speaker)
 	}
-	
+
 	return nil
 }
 
@@ -219,7 +219,7 @@ func (s *SynthAgent) GetCommandLine(voice *Voice, params *SynthParams, outputPat
 	if params == nil {
 		params = s.getDefaultParams()
 	}
-	
+
 	cmd := s.buildPiperCommand(voice.Path, outputPath, params)
 	return strings.Join(append([]string{cmd.Path}, cmd.Args[1:]...), " ")
 }

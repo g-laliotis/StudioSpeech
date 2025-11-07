@@ -10,10 +10,10 @@ import (
 var (
 	// Version is the semantic version of the application
 	Version = "dev"
-	
+
 	// BuildTime is when the binary was built
 	BuildTime = "unknown"
-	
+
 	// GitCommit is the git commit hash
 	GitCommit = "unknown"
 )

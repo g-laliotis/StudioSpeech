@@ -9,15 +9,15 @@ import (
 
 // EnvironmentInfo contains system environment details
 type EnvironmentInfo struct {
-	PiperPath    string
-	PiperVersion string
-	FFmpegPath   string
+	PiperPath     string
+	PiperVersion  string
+	FFmpegPath    string
 	FFmpegVersion string
-	OS           string
-	Arch         string
-	GoVersion    string
-	HasPiper     bool
-	HasFFmpeg    bool
+	OS            string
+	Arch          string
+	GoVersion     string
+	HasPiper      bool
+	HasFFmpeg     bool
 }
 
 // EnvironmentAgent handles system requirements validation
@@ -35,17 +35,17 @@ func (e *EnvironmentAgent) Check() (*EnvironmentInfo, error) {
 		Arch:      runtime.GOARCH,
 		GoVersion: runtime.Version(),
 	}
-	
+
 	// Check Piper TTS
 	if err := e.checkPiper(info); err != nil {
 		// Piper not found, but continue checking other components
 	}
-	
+
 	// Check FFmpeg
 	if err := e.checkFFmpeg(info); err != nil {
 		// FFmpeg not found, but continue checking other components
 	}
-	
+
 	return info, nil
 }
 
@@ -57,9 +57,9 @@ func (e *EnvironmentAgent) checkPiper(info *EnvironmentInfo) error {
 		info.HasPiper = false
 		return fmt.Errorf("piper not found in PATH")
 	}
-	
+
 	info.PiperPath = path
-	
+
 	// Get version
 	cmd := exec.Command("piper", "--version")
 	output, err := cmd.Output()
@@ -67,10 +67,10 @@ func (e *EnvironmentAgent) checkPiper(info *EnvironmentInfo) error {
 		info.HasPiper = false
 		return fmt.Errorf("failed to get piper version: %w", err)
 	}
-	
+
 	info.PiperVersion = strings.TrimSpace(string(output))
 	info.HasPiper = true
-	
+
 	return nil
 }
 
@@ -82,9 +82,9 @@ func (e *EnvironmentAgent) checkFFmpeg(info *EnvironmentInfo) error {
 		info.HasFFmpeg = false
 		return fmt.Errorf("ffmpeg not found in PATH")
 	}
-	
+
 	info.FFmpegPath = path
-	
+
 	// Get version
 	cmd := exec.Command("ffmpeg", "-version")
 	output, err := cmd.Output()
@@ -92,7 +92,7 @@ func (e *EnvironmentAgent) checkFFmpeg(info *EnvironmentInfo) error {
 		info.HasFFmpeg = false
 		return fmt.Errorf("failed to get ffmpeg version: %w", err)
 	}
-	
+
 	// Extract version from first line (e.g., "ffmpeg version 4.4.2")
 	lines := strings.Split(string(output), "\n")
 	if len(lines) > 0 {
@@ -103,7 +103,7 @@ func (e *EnvironmentAgent) checkFFmpeg(info *EnvironmentInfo) error {
 			info.FFmpegVersion = "unknown"
 		}
 	}
-	
+
 	info.HasFFmpeg = true
 	return nil
 }
@@ -111,9 +111,9 @@ func (e *EnvironmentAgent) checkFFmpeg(info *EnvironmentInfo) error {
 // GetInstallGuide returns OS-specific installation instructions
 func (e *EnvironmentAgent) GetInstallGuide(missing []string) string {
 	var guide strings.Builder
-	
+
 	guide.WriteString("📋 Installation Guide:\n\n")
-	
+
 	for _, tool := range missing {
 		switch tool {
 		case "piper":
@@ -130,7 +130,7 @@ func (e *EnvironmentAgent) GetInstallGuide(missing []string) string {
 				guide.WriteString("  Extract and add to PATH\n")
 			}
 			guide.WriteString("\n")
-			
+
 		case "ffmpeg":
 			guide.WriteString("FFmpeg:\n")
 			switch runtime.GOOS {
@@ -147,6 +147,6 @@ func (e *EnvironmentAgent) GetInstallGuide(missing []string) string {
 			guide.WriteString("\n")
 		}
 	}
-	
+
 	return guide.String()
 }

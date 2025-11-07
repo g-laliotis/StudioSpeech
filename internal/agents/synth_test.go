@@ -9,7 +9,7 @@ import (
 
 func TestSynthAgent_ValidateParams(t *testing.T) {
 	agent := NewSynthAgent("piper", "/tmp")
-	
+
 	tests := []struct {
 		params    *SynthParams
 		shouldErr bool
@@ -41,7 +41,7 @@ func TestSynthAgent_ValidateParams(t *testing.T) {
 			desc:      "noise too high",
 		},
 	}
-	
+
 	for _, test := range tests {
 		err := agent.validateParams(test.params)
 		if test.shouldErr && err == nil {
@@ -55,17 +55,17 @@ func TestSynthAgent_ValidateParams(t *testing.T) {
 
 func TestSynthAgent_GetDefaultParams(t *testing.T) {
 	agent := NewSynthAgent("piper", "/tmp")
-	
+
 	params := agent.getDefaultParams()
-	
+
 	if params.Speed <= 0 {
 		t.Error("Default speed should be positive")
 	}
-	
+
 	if params.Noise < 0 || params.Noise > 1 {
 		t.Error("Default noise should be between 0 and 1")
 	}
-	
+
 	if params.NoiseW < 0 || params.NoiseW > 1 {
 		t.Error("Default noiseW should be between 0 and 1")
 	}
@@ -73,22 +73,22 @@ func TestSynthAgent_GetDefaultParams(t *testing.T) {
 
 func TestSynthAgent_GetCommandLine(t *testing.T) {
 	agent := NewSynthAgent("piper", "/tmp")
-	
+
 	voice := &Voice{
 		ID:         "test_voice",
 		Path:       "/path/to/voice.onnx",
 		SampleRate: 22050,
 	}
-	
+
 	params := &SynthParams{
 		Speed:   1.0,
 		Noise:   0.5,
 		NoiseW:  0.8,
 		Speaker: 0,
 	}
-	
+
 	cmdLine := agent.GetCommandLine(voice, params, "/tmp/output.wav")
-	
+
 	// Check that command contains expected parameters
 	expectedParts := []string{
 		"--model", "/path/to/voice.onnx",
@@ -97,7 +97,7 @@ func TestSynthAgent_GetCommandLine(t *testing.T) {
 		"--noise_scale", "0.500",
 		"--noise_w", "0.800",
 	}
-	
+
 	for _, part := range expectedParts {
 		if !strings.Contains(cmdLine, part) {
 			t.Errorf("Command line missing expected part: %s\nFull command: %s", part, cmdLine)
@@ -112,42 +112,42 @@ func TestSynthAgent_DryRun(t *testing.T) {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
 	defer os.RemoveAll(tempDir)
-	
+
 	agent := NewSynthAgent("piper", tempDir)
 	agent.SetDryRun(true)
-	
+
 	normalized := &NormalizedText{
 		Sentences: []string{"Hello world.", "This is a test."},
 		Language:  "en-US",
 	}
-	
+
 	voice := &Voice{
 		ID:         "test_voice",
 		Path:       filepath.Join(tempDir, "voice.onnx"), // Non-existent file for dry run
 		SampleRate: 22050,
 	}
-	
+
 	// Create dummy voice file for dry run test
 	if err := os.WriteFile(voice.Path, []byte("dummy"), 0644); err != nil {
 		t.Fatalf("Failed to create dummy voice file: %v", err)
 	}
-	
+
 	params := &SynthParams{
 		Speed:   1.0,
 		Noise:   0.5,
 		NoiseW:  0.8,
 		Speaker: 0,
 	}
-	
+
 	result, err := agent.Synthesize(normalized, voice, params)
 	if err != nil {
 		t.Fatalf("Dry run synthesis failed: %v", err)
 	}
-	
+
 	if result.OutputPath == "" {
 		t.Error("Expected output path in dry run result")
 	}
-	
+
 	if result.SampleRate != voice.SampleRate {
 		t.Errorf("Expected sample rate %d, got %d", voice.SampleRate, result.SampleRate)
 	}

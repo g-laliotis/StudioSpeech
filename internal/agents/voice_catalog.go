@@ -50,21 +50,21 @@ func (v *VoiceCatalogAgent) LoadCatalog() error {
 		return fmt.Errorf("failed to open catalog file: %w", err)
 	}
 	defer file.Close()
-	
+
 	decoder := json.NewDecoder(file)
 	catalog := &VoiceCatalog{}
-	
+
 	if err := decoder.Decode(catalog); err != nil {
 		return fmt.Errorf("failed to parse catalog JSON: %w", err)
 	}
-	
+
 	// Validate each voice entry
 	for i, voice := range catalog.Voices {
 		if err := v.validateVoice(&voice); err != nil {
 			return fmt.Errorf("invalid voice entry %d (%s): %w", i, voice.ID, err)
 		}
 	}
-	
+
 	v.catalog = catalog
 	return nil
 }
@@ -75,30 +75,30 @@ func (v *VoiceCatalogAgent) validateVoice(voice *Voice) error {
 	if voice.ID == "" {
 		return fmt.Errorf("voice ID is required")
 	}
-	
+
 	if voice.Language == "" {
 		return fmt.Errorf("language is required")
 	}
-	
+
 	if voice.LicenseName == "" {
 		return fmt.Errorf("license_name is required")
 	}
-	
+
 	// CRITICAL: Block non-commercial voices
 	if !voice.CommercialUseAllowed {
-		return fmt.Errorf("voice %s is not allowed for commercial use (license: %s)", 
+		return fmt.Errorf("voice %s is not allowed for commercial use (license: %s)",
 			voice.ID, voice.LicenseName)
 	}
-	
+
 	// Auto-detect non-commercial licenses
 	licenseLower := strings.ToLower(voice.LicenseName)
-	if strings.Contains(licenseLower, "non-commercial") || 
-	   strings.Contains(licenseLower, "nc") ||
-	   strings.Contains(licenseLower, "by-nc") {
-		return fmt.Errorf("voice %s has non-commercial license: %s", 
+	if strings.Contains(licenseLower, "non-commercial") ||
+		strings.Contains(licenseLower, "nc") ||
+		strings.Contains(licenseLower, "by-nc") {
+		return fmt.Errorf("voice %s has non-commercial license: %s",
 			voice.ID, voice.LicenseName)
 	}
-	
+
 	return nil
 }
 
@@ -107,7 +107,7 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID, gender string) (*Voic
 	if v.catalog == nil {
 		return nil, fmt.Errorf("catalog not loaded")
 	}
-	
+
 	// If specific voice ID requested, find it
 	if voiceID != "auto" && voiceID != "" {
 		for _, voice := range v.catalog.Voices {
@@ -117,24 +117,24 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID, gender string) (*Voic
 		}
 		return nil, fmt.Errorf("voice ID %s not found in catalog", voiceID)
 	}
-	
+
 	// Auto-select based on language and gender
 	var candidates []Voice
-	
+
 	// Normalize language code
 	lang := v.normalizeLanguage(language)
-	
+
 	// Find voices matching the language
 	for _, voice := range v.catalog.Voices {
 		if strings.HasPrefix(voice.Language, lang) {
 			candidates = append(candidates, voice)
 		}
 	}
-	
+
 	if len(candidates) == 0 {
 		return nil, fmt.Errorf("no voices found for language %s", language)
 	}
-	
+
 	// Filter by gender if specified
 	if gender != "auto" && gender != "" {
 		var genderCandidates []Voice
@@ -147,7 +147,7 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID, gender string) (*Voic
 			candidates = genderCandidates
 		}
 	}
-	
+
 	// Prefer higher quality voices (heuristic: higher sample rate)
 	bestVoice := &candidates[0]
 	for i := 1; i < len(candidates); i++ {
@@ -155,7 +155,7 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID, gender string) (*Voic
 			bestVoice = &candidates[i]
 		}
 	}
-	
+
 	return bestVoice, nil
 }
 
@@ -181,30 +181,30 @@ func (v *VoiceCatalogAgent) ValidateVoiceFile(voice *Voice) error {
 	if _, err := os.Stat(voice.Path); os.IsNotExist(err) {
 		return fmt.Errorf("voice model file not found: %s", voice.Path)
 	}
-	
+
 	// Skip hash validation if not provided
 	if voice.SHA256 == "" || voice.SHA256 == "<fill after download>" {
 		return nil
 	}
-	
+
 	// Validate file hash
 	file, err := os.Open(voice.Path)
 	if err != nil {
 		return fmt.Errorf("failed to open voice file: %w", err)
 	}
 	defer file.Close()
-	
+
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, file); err != nil {
 		return fmt.Errorf("failed to calculate file hash: %w", err)
 	}
-	
+
 	actualHash := fmt.Sprintf("%x", hasher.Sum(nil))
 	if actualHash != voice.SHA256 {
-		return fmt.Errorf("voice file hash mismatch: expected %s, got %s", 
+		return fmt.Errorf("voice file hash mismatch: expected %s, got %s",
 			voice.SHA256, actualHash)
 	}
-	
+
 	return nil
 }
 
@@ -219,25 +219,25 @@ func (v *VoiceCatalogAgent) GetAvailableVoices() []Voice {
 // GetAttributionText returns required attribution text for voices that need it
 func (v *VoiceCatalogAgent) GetAttributionText() []string {
 	var attributions []string
-	
+
 	if v.catalog == nil {
 		return attributions
 	}
-	
+
 	for _, voice := range v.catalog.Voices {
 		if voice.AttributionRequired {
 			switch {
 			case strings.Contains(strings.ToLower(voice.LicenseName), "libritts"):
-				attributions = append(attributions, 
+				attributions = append(attributions,
 					fmt.Sprintf("Voice %s: This project uses the LibriTTS dataset (CC BY 4.0). "+
-						"© Original contributors. Licensed under CC BY 4.0 (%s). No endorsement implied.", 
+						"© Original contributors. Licensed under CC BY 4.0 (%s). No endorsement implied.",
 						voice.ID, voice.LicenseURL))
 			default:
-				attributions = append(attributions, 
+				attributions = append(attributions,
 					fmt.Sprintf("Voice %s: %s (%s)", voice.ID, voice.LicenseName, voice.LicenseURL))
 			}
 		}
 	}
-	
+
 	return attributions
 }

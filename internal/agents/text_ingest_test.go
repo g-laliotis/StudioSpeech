@@ -9,7 +9,7 @@ func TestTextIngestAgent_ProcessTxtFile(t *testing.T) {
 	agent := NewTextIngestAgent()
 
 	// Test English text file
-	englishFile := filepath.Join("..", "..", "testdata", "demo.txt")
+	englishFile := filepath.Join("..", "..", "testdata", "samples", "sample.txt")
 	content, err := agent.ProcessFile(englishFile)
 	if err != nil {
 		t.Fatalf("Failed to process English text file: %v", err)
@@ -35,7 +35,7 @@ func TestTextIngestAgent_ProcessGreekFile(t *testing.T) {
 	agent := NewTextIngestAgent()
 
 	// Test Greek text file
-	greekFile := filepath.Join("..", "..", "testdata", "greek_demo.txt")
+	greekFile := filepath.Join("..", "..", "testdata", "samples", "greek.txt")
 	content, err := agent.ProcessFile(greekFile)
 	if err != nil {
 		t.Fatalf("Failed to process Greek text file: %v", err)

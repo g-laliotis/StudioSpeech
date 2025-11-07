@@ -35,10 +35,11 @@ help:
 	@sed -n 's/^##//p' $(MAKEFILE_LIST) | column -t -s ':' | sed -e 's/^/ /'
 	@echo ""
 	@echo "$(YELLOW)Examples:$(RESET)"
-	@echo "  $(GREEN)make build$(RESET)     - Build optimized binary"
-	@echo "  $(GREEN)make test$(RESET)      - Run all tests"
-	@echo "  $(GREEN)make run$(RESET)       - Test with sample data"
-	@echo "  $(GREEN)make clean$(RESET)     - Clean build artifacts"
+	@echo "  $(GREEN)make build$(RESET)        - Build optimized binary"
+	@echo "  $(GREEN)make test$(RESET)         - Run all tests"
+	@echo "  $(GREEN)make run \"file.txt\"$(RESET) - Convert file.txt to file.mp3"
+	@echo "  $(GREEN)make run-greek \"script.txt\"$(RESET) - Convert to Greek speech"
+	@echo "  $(GREEN)make clean$(RESET)        - Clean build artifacts"
 
 ## build: Build the CLI binary with version info
 build: check-deps
@@ -47,19 +48,31 @@ build: check-deps
 	@go build $(BUILD_FLAGS) -o $(BIN_DIR)/$(BINARY_NAME) $(CMD_DIR)
 	@echo "$(GREEN)✓ Built $(BIN_DIR)/$(BINARY_NAME)$(RESET)"
 
-## run: Run synthesis on sample data
+## run: Run synthesis on sample data or specified file
 run: build
-	@echo "$(BLUE)Running synthesis on sample data...$(RESET)"
-	@if [ -f "testdata/samples/sample.txt" ]; then \
-		./$(BIN_DIR)/$(BINARY_NAME) synth testdata/samples/sample.txt output.mp3; \
-		echo "$(GREEN)✓ Generated output.mp3$(RESET)"; \
+	@if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		INPUT_FILE="$(filter-out $@,$(MAKECMDGOALS))"; \
+		OUTPUT_FILE="$${INPUT_FILE%.*}.mp3"; \
+		echo "$(BLUE)Converting $$INPUT_FILE to $$OUTPUT_FILE...$(RESET)"; \
+		./$(BIN_DIR)/$(BINARY_NAME) synth --in "$$INPUT_FILE" --out "$$OUTPUT_FILE"; \
+		echo "$(GREEN)✓ Generated $$OUTPUT_FILE$(RESET)"; \
 	else \
-		echo "$(YELLOW)⚠ Sample file not found, creating test file...$(RESET)"; \
-		mkdir -p testdata/samples; \
-		echo "Hello world. This is a test sentence with proper punctuation!" > testdata/samples/sample.txt; \
-		./$(BIN_DIR)/$(BINARY_NAME) synth testdata/samples/sample.txt output.mp3; \
-		echo "$(GREEN)✓ Generated output.mp3$(RESET)"; \
+		echo "$(BLUE)Running synthesis on sample data...$(RESET)"; \
+		if [ -f "testdata/samples/sample.txt" ]; then \
+			./$(BIN_DIR)/$(BINARY_NAME) synth --in testdata/samples/sample.txt --out output.mp3; \
+			echo "$(GREEN)✓ Generated output.mp3$(RESET)"; \
+		else \
+			echo "$(YELLOW)⚠ Sample file not found, creating test file...$(RESET)"; \
+			mkdir -p testdata/samples; \
+			echo "Hello world. This is a test sentence with proper punctuation!" > testdata/samples/sample.txt; \
+			./$(BIN_DIR)/$(BINARY_NAME) synth --in testdata/samples/sample.txt --out output.mp3; \
+			echo "$(GREEN)✓ Generated output.mp3$(RESET)"; \
+		fi; \
 	fi
+
+# Allow make run "filename" to work
+%:
+	@:
 
 ## test: Run all tests
 test:
@@ -165,3 +178,39 @@ release: clean check-deps
 ## dev: Development workflow (fmt, vet, test, build)
 dev: fmt vet test build
 	@echo "$(GREEN)✓ Development workflow completed$(RESET)"
+
+## run-greek: Convert file to Greek speech
+run-greek: build
+	@if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		INPUT_FILE="$(filter-out $@,$(MAKECMDGOALS))"; \
+		OUTPUT_FILE="$${INPUT_FILE%.*}.mp3"; \
+		echo "$(BLUE)Converting $$INPUT_FILE to Greek speech...$(RESET)"; \
+		./$(BIN_DIR)/$(BINARY_NAME) synth --in "$$INPUT_FILE" --lang el-GR --gender female --out "$$OUTPUT_FILE"; \
+		echo "$(GREEN)✓ Generated $$OUTPUT_FILE with Greek voice$(RESET)"; \
+	else \
+		echo "$(RED)Usage: make run-greek \"filename.txt\"$(RESET)"; \
+	fi
+
+## run-male: Convert file to male voice
+run-male: build
+	@if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		INPUT_FILE="$(filter-out $@,$(MAKECMDGOALS))"; \
+		OUTPUT_FILE="$${INPUT_FILE%.*}.mp3"; \
+		echo "$(BLUE)Converting $$INPUT_FILE to male voice...$(RESET)"; \
+		./$(BIN_DIR)/$(BINARY_NAME) synth --in "$$INPUT_FILE" --gender male --out "$$OUTPUT_FILE"; \
+		echo "$(GREEN)✓ Generated $$OUTPUT_FILE with male voice$(RESET)"; \
+	else \
+		echo "$(RED)Usage: make run-male \"filename.txt\"$(RESET)"; \
+	fi
+
+## run-female: Convert file to female voice
+run-female: build
+	@if [ "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
+		INPUT_FILE="$(filter-out $@,$(MAKECMDGOALS))"; \
+		OUTPUT_FILE="$${INPUT_FILE%.*}.mp3"; \
+		echo "$(BLUE)Converting $$INPUT_FILE to female voice...$(RESET)"; \
+		./$(BIN_DIR)/$(BINARY_NAME) synth --in "$$INPUT_FILE" --gender female --out "$$OUTPUT_FILE"; \
+		echo "$(GREEN)✓ Generated $$OUTPUT_FILE with female voice$(RESET)"; \
+	else \
+		echo "$(RED)Usage: make run-female \"filename.txt\"$(RESET)"; \
+	fi

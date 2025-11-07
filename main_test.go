@@ -98,7 +98,7 @@ func TestFileProcessingIntegration(t *testing.T) {
 			}
 
 			// Test file processing pipeline
-			outputFile := filepath.Join(tempDir, "output.mp3")
+			_ = filepath.Join(tempDir, "output.mp3")
 			
 			// This would run the actual pipeline
 			// For now, we'll test file creation and basic validation
@@ -147,7 +147,7 @@ func TestErrorHandling(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			inputFile := tt.setupFunc()
+			_ = tt.setupFunc()
 			outputFile := filepath.Join(tempDir, "output.mp3")
 			
 			// Test error handling

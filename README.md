@@ -287,8 +287,7 @@ StudioSpeech/
 │       ├── postprocess.go  # Audio processing
 │       └── cache.go        # Result caching
 ├── testdata/
-│   ├── samples/            # Sample files for testing
-│   └── comprehensive/      # Comprehensive test cases
+│   └── samples/            # Sample files for testing
 ├── voices/
 │   └── catalog.json        # Voice model catalog
 ├── .gitignore
@@ -406,7 +405,7 @@ We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for 
 Distributed under the MIT License.  
 See [LICENSE](LICENSE) for details.
 
-Voice model licensing information: [LICENSES.md](LICENSES.md)
+**Voice Licensing**: Uses macOS built-in voices which are commercially licensed by Apple.
 
 ---
 

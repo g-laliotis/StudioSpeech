@@ -1,31 +1,48 @@
-# Build artifacts
-/bin/
-/dist/
+# Binaries
+bin/
 *.exe
+ttscli
 
-# Go build cache
-*.sum
+# Go build artifacts
+*.so
+*.dylib
+*.dll
 
-# IDE files
-.vscode/settings.json
-.idea/
+# Test binary, built with `go test -c`
+*.test
 
-# OS files
-.DS_Store
-Thumbs.db
+# Output of the go coverage tool
+*.out
+coverage.html
 
-# Voice model files (users download separately)
-/voices/*.onnx
-/voices/*.onnx.json
+# Go workspace file
+go.work
+
+# Audio files
+*.mp3
+*.wav
+*.aiff
 
 # Temporary files
 /tmp/
 *.tmp
-*.wav.tmp
-*.mp3.tmp
+*.temp
 
-# Cache directory
-/.cache/
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Test outputs
-/testdata/output/
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Cache directories
+/cache/

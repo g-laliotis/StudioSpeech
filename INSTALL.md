@@ -61,7 +61,7 @@ go build -o ttscli.exe ./cmd/ttscli
 | Platform | Primary TTS | Voice Quality | Greek Support |
 |----------|-------------|---------------|---------------|
 | **macOS** | Built-in `say` | ⭐⭐⭐⭐⭐ | ✅ Native (Melina) |
-| **Linux** | System TTS | ⭐⭐⭐ | ⚠️ Limited |
+| **Linux** | Built-in TTS | ⭐⭐⭐ | ⚠️ Limited |
 | **Windows** | SAPI | ⭐⭐⭐ | ⚠️ Limited |
 
 ---
@@ -158,7 +158,7 @@ make run-male "script.txt"
 
 ### Environment Variables
 ```bash
-# TTS Engine preference (macOS users can skip this)
+# TTS Engine (automatically uses macOS native TTS)
 export STUDIOSPEECH_TTS_ENGINE=macos
 
 # Cache settings
@@ -231,7 +231,7 @@ make run "your-file.txt"
 - For Greek voices, ensure language pack is installed
 
 **Linux:**
-- Install additional TTS engines: `sudo apt install espeak espeak-data`
+- Install system TTS: `sudo apt install espeak espeak-data`
 - For better quality: `sudo apt install festival festvox-kallpc16k`
 
 **Windows:**

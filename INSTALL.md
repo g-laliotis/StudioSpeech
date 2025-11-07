@@ -28,23 +28,35 @@ cd StudioSpeech
 
 # 2. Install dependencies
 sudo apt update
-sudo apt install ffmpeg golang-go
+sudo apt install ffmpeg golang-go espeak espeak-data
 
-# 3. Build and run
+# 3. Build and test
 make build
-make run "your-file.txt"
+make run "testdata/samples/sample.txt"
+```
+
+**Note**: Linux uses eSpeak for TTS. For better quality, install Festival:
+```bash
+sudo apt install festival festvox-kallpc16k
 ```
 
 ### 🪟 Windows
 ```powershell
 # 1. Install Go from https://golang.org/dl/
 # 2. Install FFmpeg from https://ffmpeg.org/download.html
+# 3. Install Git from https://git-scm.com/download/win
 
-# 3. Clone and build
+# 4. Clone and build
 git clone https://github.com/g-laliotis/StudioSpeech.git
 cd StudioSpeech
 go build -o ttscli.exe ./cmd/ttscli
+
+# 5. Test installation
+.\ttscli.exe version
+.\ttscli.exe synth --in "testdata\samples\sample.txt" --out "test.mp3"
 ```
+
+**Note**: Windows uses SAPI for TTS. Greek support is limited compared to macOS.
 
 ---
 
@@ -108,6 +120,7 @@ sudo yum install ffmpeg
 - Add `C:\ffmpeg\bin` to PATH
 
 ### Step 3: Clone and Build
+**macOS/Linux:**
 ```bash
 git clone https://github.com/g-laliotis/StudioSpeech.git
 cd StudioSpeech
@@ -115,10 +128,25 @@ make deps
 make build
 ```
 
+**Windows:**
+```powershell
+git clone https://github.com/g-laliotis/StudioSpeech.git
+cd StudioSpeech
+go mod tidy
+go build -o ttscli.exe ./cmd/ttscli
+```
+
 ### Step 4: Verify Installation
+**macOS/Linux:**
 ```bash
 make check
 ./bin/ttscli version
+```
+
+**Windows:**
+```powershell
+.\ttscli.exe version
+.\ttscli.exe check
 ```
 
 ---
@@ -157,9 +185,10 @@ make run-male "script.txt"
 ## 🔧 Configuration
 
 ### Environment Variables
+**macOS/Linux:**
 ```bash
-# TTS Engine (automatically uses macOS native TTS)
-export STUDIOSPEECH_TTS_ENGINE=macos
+# TTS Engine
+export STUDIOSPEECH_TTS_ENGINE=macos  # or system
 
 # Cache settings
 export STUDIOSPEECH_CACHE_DIR=/tmp/studiospeech
@@ -168,6 +197,20 @@ export STUDIOSPEECH_CACHE_TTL=30d
 # Audio quality
 export STUDIOSPEECH_SAMPLE_RATE=48000
 export STUDIOSPEECH_BITRATE=192
+```
+
+**Windows:**
+```powershell
+# TTS Engine
+$env:STUDIOSPEECH_TTS_ENGINE="sapi"
+
+# Cache settings
+$env:STUDIOSPEECH_CACHE_DIR="C:\temp\studiospeech"
+$env:STUDIOSPEECH_CACHE_TTL="30d"
+
+# Audio quality
+$env:STUDIOSPEECH_SAMPLE_RATE="48000"
+$env:STUDIOSPEECH_BITRATE="192"
 ```
 
 ### Voice Customization

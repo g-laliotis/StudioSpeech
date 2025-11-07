@@ -1,0 +1,103 @@
+package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"studiospeech/internal/agents"
+)
+
+// executeSynthesisPipeline runs the complete TTS pipeline
+func executeSynthesisPipeline() error {
+	fmt.Println("🔄 Starting synthesis pipeline...")
+	
+	// Step 1: Text Ingestion
+	fmt.Printf("📖 Reading input file: %s\n", inputFile)
+	textAgent := agents.NewTextIngestAgent()
+	content, err := textAgent.ProcessFile(inputFile)
+	if err != nil {
+		return fmt.Errorf("text ingestion failed: %w", err)
+	}
+	
+	if err := textAgent.ValidateContent(content); err != nil {
+		return fmt.Errorf("content validation failed: %w", err)
+	}
+	
+	fmt.Printf("   ✓ Processed %d paragraphs, %d words\n", len(content.Paragraphs), content.WordCount)
+	fmt.Printf("   ✓ Detected language: %s\n", content.Language)
+	
+	// Override language if specified
+	if language != "auto" {
+		content.Language = language
+		fmt.Printf("   ✓ Language override: %s\n", language)
+	}
+	
+	// Step 2: Voice Selection
+	fmt.Printf("🎭 Selecting voice...\n")
+	catalogPath := filepath.Join("voices", "catalog.json")
+	voiceAgent := agents.NewVoiceCatalogAgent(catalogPath)
+	
+	if err := voiceAgent.LoadCatalog(); err != nil {
+		return fmt.Errorf("voice catalog loading failed: %w", err)
+	}
+	
+	selectedVoice, err := voiceAgent.SelectVoice(content.Language, voiceID)
+	if err != nil {
+		return fmt.Errorf("voice selection failed: %w", err)
+	}
+	
+	fmt.Printf("   ✓ Selected voice: %s (%s)\n", selectedVoice.ID, selectedVoice.Style)
+	
+	// Step 3: Text Normalization
+	fmt.Printf("🔧 Normalizing text...\n")
+	normalizeAgent := agents.NewNormalizeAgent()
+	normalized, err := normalizeAgent.Normalize(content)
+	if err != nil {
+		return fmt.Errorf("text normalization failed: %w", err)
+	}
+	
+	if err := normalizeAgent.ValidateNormalizedText(normalized); err != nil {
+		return fmt.Errorf("normalized text validation failed: %w", err)
+	}
+	
+	fmt.Printf("   ✓ Generated %d sentences\n", len(normalized.Sentences))
+	
+	// Step 4: Synthesis (Dry Run for now)
+	fmt.Printf("🎤 Synthesizing speech...\n")
+	
+	// Create temp directory
+	tempDir, err := os.MkdirTemp("", "studiospeech_*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	defer os.RemoveAll(tempDir)
+	
+	// Initialize synthesis agent
+	synthAgent := agents.NewSynthAgent("piper", tempDir)
+	synthAgent.SetDryRun(true) // Dry run until Piper is available
+	
+	// Set synthesis parameters
+	params := &agents.SynthParams{
+		Speed:   speed,
+		Noise:   noise,
+		NoiseW:  noisew,
+		Speaker: 0,
+	}
+	
+	result, err := synthAgent.Synthesize(normalized, selectedVoice, params)
+	if err != nil {
+		return fmt.Errorf("synthesis failed: %w", err)
+	}
+	
+	fmt.Printf("   ✓ Generated audio: %s\n", result.OutputPath)
+	fmt.Printf("   ✓ Sample rate: %d Hz, Channels: %d\n", result.SampleRate, result.Channels)
+	
+	// Step 5: Post-processing (Placeholder)
+	fmt.Printf("🎵 Post-processing...\n")
+	fmt.Printf("   ⚠️  Audio post-processing not yet implemented\n")
+	fmt.Printf("   ⚠️  This is a dry-run - no actual audio generated\n")
+	fmt.Printf("   ⚠️  Install Piper TTS to enable real synthesis\n")
+	
+	return nil
+}

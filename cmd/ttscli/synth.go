@@ -106,13 +106,13 @@ func runSynth(cmd *cobra.Command, args []string) {
 	}
 	fmt.Printf("📈 Sample Rate: %d Hz\n\n", sampleRate)
 	
-	// TODO: Implement synthesis pipeline
-	fmt.Println("⚠️  Synthesis pipeline not yet implemented")
-	fmt.Println("   This will be implemented in the next commits:")
-	fmt.Println("   1. Text ingestion (.txt/.docx)")
-	fmt.Println("   2. Text normalization")
-	fmt.Println("   3. Voice synthesis (Piper)")
-	fmt.Println("   4. Audio post-processing (FFmpeg)")
+	// Execute synthesis pipeline
+	if err := executeSynthesisPipeline(); err != nil {
+		fmt.Printf("❌ Synthesis failed: %v\n", err)
+		return
+	}
+	
+	fmt.Println("✅ Synthesis completed successfully!")
 }
 
 // validateInputFile checks if input file exists and has supported extension

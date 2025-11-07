@@ -1,0 +1,43 @@
+{
+  "voices": [
+    {
+      "id": "en_us_ljspeech_medium",
+      "language": "en-US",
+      "style": "female-neutral",
+      "sample_rate": 22050,
+      "commercial_use_allowed": true,
+      "attribution_required": false,
+      "license_name": "Public Domain (LJ Speech)",
+      "license_url": "https://keithito.com/LJ-Speech-Dataset/",
+      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/ljspeech/medium",
+      "sha256": "<fill after download>",
+      "path": "<local path>/en_US-ljspeech-medium.onnx"
+    },
+    {
+      "id": "en_us_libritts_high_multi",
+      "language": "en-US",
+      "style": "multi-speaker",
+      "sample_rate": 22050,
+      "commercial_use_allowed": true,
+      "attribution_required": true,
+      "license_name": "CC BY 4.0 (LibriTTS)",
+      "license_url": "http://www.openslr.org/60/",
+      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts/high",
+      "sha256": "<fill after download>",
+      "path": "<local path>/en_US-libritts-high.onnx"
+    },
+    {
+      "id": "el_gr_rapunzelina_low",
+      "language": "el-GR",
+      "style": "female-neutral",
+      "sample_rate": 16000,
+      "commercial_use_allowed": true,
+      "attribution_required": false,
+      "license_name": "CC0 (Greek Single Speaker Dataset)",
+      "license_url": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
+      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/el/el_GR/rapunzelina/low",
+      "sha256": "<fill after download>",
+      "path": "<local path>/el_GR-rapunzelina-low.onnx"
+    }
+  ]
+}

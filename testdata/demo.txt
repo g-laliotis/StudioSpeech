@@ -1,0 +1,5 @@
+Hello world! This is a test of the StudioSpeech text-to-speech system.
+
+The system supports multiple languages including English and Greek. It can process both plain text files and Microsoft Word documents.
+
+This sample text will be used for testing the basic functionality of our TTS pipeline.

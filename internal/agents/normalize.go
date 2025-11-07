@@ -211,8 +211,8 @@ func (n *NormalizeAgent) ValidateNormalizedText(normalized *NormalizedText) erro
 	
 	// Check for reasonable sentence lengths
 	for i, sentence := range normalized.Sentences {
-		if len(sentence) > 1000 {
-			return fmt.Errorf("sentence %d too long: %d characters (max 1000)", i, len(sentence))
+		if len(sentence) > 1500 {
+			return fmt.Errorf("sentence %d too long: %d characters (max 1500)", i, len(sentence))
 		}
 		
 		if strings.TrimSpace(sentence) == "" {

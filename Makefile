@@ -37,8 +37,9 @@ help:
 	@echo "$(YELLOW)Examples:$(RESET)"
 	@echo "  $(GREEN)make build$(RESET)        - Build optimized binary"
 	@echo "  $(GREEN)make test$(RESET)         - Run all tests"
-	@echo "  $(GREEN)make run \"file.txt\"$(RESET) - Convert file.txt to file.mp3"
-	@echo "  $(GREEN)make run-greek \"script.txt\"$(RESET) - Convert to Greek speech"
+	@echo "  $(GREEN)make run \"file.txt\"$(RESET)    - Convert file.txt to file.mp3"
+	@echo "  $(GREEN)make run-greek \"file.txt\"$(RESET) - Convert to Greek speech"
+	@echo "  $(GREEN)make run-male \"file.txt\"$(RESET)  - Convert to male voice"
 	@echo "  $(GREEN)make clean$(RESET)        - Clean build artifacts"
 
 ## build: Build the CLI binary with version info

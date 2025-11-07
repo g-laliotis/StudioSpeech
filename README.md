@@ -66,52 +66,63 @@ This design keeps each processing stage isolated, testable, and auditable.
 
 ## ⚙️ Installation
 
-**Clone the repository**
+**macOS (Recommended - Native Greek Support)**
 ```bash
 git clone https://github.com/g-laliotis/StudioSpeech.git
 cd StudioSpeech
+brew install ffmpeg
+make build
 ```
 
-**Install Go (v1.21 or higher)**
+**Linux**
 ```bash
-go version
-# should print go version go1.21+ ...
+git clone https://github.com/g-laliotis/StudioSpeech.git
+cd StudioSpeech
+sudo apt install ffmpeg golang-go
+make build
 ```
 
-**Download dependencies**
-```bash
-go mod tidy
+**Windows**
+```powershell
+# Install Go from https://golang.org/dl/
+# Install FFmpeg from https://ffmpeg.org/download.html
+git clone https://github.com/g-laliotis/StudioSpeech.git
+cd StudioSpeech
+go build -o ttscli.exe ./cmd/ttscli
 ```
 
-**Check version**
+**Verify installation**
 ```bash
-go run ./cmd/ttscli --version
+make check
+./bin/ttscli version
 ```
 
 ---
 
 ## 🚦 Usage
 
-**Basic command**
+**Simple Commands (Recommended)**
 ```bash
-go run ./cmd/ttscli synth <input_file> <output_file>
+# Convert any file to speech
+make run "script.txt"          # → script.mp3
+make run "document.pdf"        # → document.mp3
+
+# Language-specific
+make run-greek "script.txt"    # → Greek female voice
+make run-male "script.txt"     # → Male voice
+make run-female "script.txt"   # → Female voice
 ```
 
-**Example:**
+**Advanced Usage**
 ```bash
-go run ./cmd/ttscli synth testdata/samples/sample.txt result.mp3
-```
-
-**Advanced usage:**
-```bash
-# Greek female voice
-go run ./cmd/ttscli synth --in script.pdf --lang el-GR --gender female --out greek_voice.mp3
-
-# English male voice with custom speed
-go run ./cmd/ttscli synth --in document.docx --lang en-US --gender male --speed 1.2 --out english_voice.wav
+# Full control
+./bin/ttscli synth --in script.pdf --lang el-GR --gender female --out greek_voice.mp3
 
 # System check
-go run ./cmd/ttscli check
+./bin/ttscli check
+
+# Help
+./bin/ttscli --help
 ```
 
 **Example transformation:**
@@ -216,9 +227,9 @@ go test -bench=. ./...
 
 **Test Types:**
 - **Unit tests**: `internal/agents/*_test.go`
-- **Integration tests**: `cmd/ttscli/*_test.go`
-- **Performance tests**: `benchmark_test.go`
-- **End-to-end tests**: Real audio generation validation
+- **Agent tests**: Individual component validation
+- **System tests**: `make test` for full validation
+- **Real audio generation**: `make run "test.txt"` for end-to-end testing
 
 ---
 
@@ -373,7 +384,7 @@ We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for 
 ## 📚 Documentation
 
 - **[AGENTS.md](AGENTS.md)** - Technical specification and API documentation
-- **[INSTALL.md](INSTALL.md)** - Detailed installation instructions
+- **[INSTALL.md](INSTALL.md)** - Detailed installation instructions for all platforms
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and development setup
 - **[SECURITY.md](SECURITY.md)** - Security policy and vulnerability reporting
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes

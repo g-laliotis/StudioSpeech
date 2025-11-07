@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
+	"studiospeech/internal/version"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -32,6 +34,16 @@ func Execute() {
 func init() {
 	// Global flags can be added here
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "verbose output")
+	
+	// Add version command
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print version information",
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(version.GetBuildInfo())
+		},
+	}
+	rootCmd.AddCommand(versionCmd)
 }
 
 func main() {

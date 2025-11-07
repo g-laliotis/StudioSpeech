@@ -94,7 +94,7 @@ func checkVoiceCatalog() {
 	
 	// Display available voices
 	for _, voice := range voices {
-		fmt.Printf("  - %s (%s, %s)\n", voice.ID, voice.Language, voice.Style)
+		fmt.Printf("  - %s (%s, %s %s)\n", voice.ID, voice.Language, voice.Gender, voice.Style)
 	}
 	
 	// Show attribution requirements

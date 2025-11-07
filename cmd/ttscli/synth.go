@@ -15,9 +15,9 @@ var synthCmd = &cobra.Command{
 	Long: `Convert text files (.txt or .docx) to high-quality speech audio.
 
 Examples:
-  ttscli synth --in script.txt --lang en-US --out voice.mp3
-  ttscli synth --in document.docx --lang el-GR --voice greek_default --format wav
-  ttscli synth --in story.txt --speed 1.05 --out narration.mp3`,
+  ttscli synth --in script.txt --lang en-US --gender female --out voice.mp3
+  ttscli synth --in document.docx --lang el-GR --gender male --format wav
+  ttscli synth --in story.txt --speed 1.05 --gender auto --out narration.mp3`,
 	Run: runSynth,
 }
 
@@ -29,6 +29,7 @@ var (
 	// Language and voice flags
 	language string
 	voiceID  string
+	gender   string
 	
 	// Audio format flags
 	format     string
@@ -56,6 +57,8 @@ func init() {
 	// Language and voice flags
 	synthCmd.Flags().StringVarP(&language, "lang", "l", "auto", "language code (en-US, en-UK, el-GR, or auto)")
 	synthCmd.Flags().StringVar(&voiceID, "voice", "auto", "voice ID from catalog (or auto for default)")
+	synthCmd.Flags().StringVarP(&gender, "gender", "g", "auto", "voice gender (male, female, or auto)")
+
 	
 	// Audio format flags
 	synthCmd.Flags().StringVarP(&format, "format", "f", "mp3", "output format (wav, mp3)")

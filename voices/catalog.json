@@ -1,9 +1,10 @@
 {
   "voices": [
     {
-      "id": "en_us_ljspeech_medium",
+      "id": "en_us_ljspeech_female",
       "language": "en-US",
-      "style": "female-neutral",
+      "gender": "female",
+      "style": "neutral",
       "sample_rate": 22050,
       "commercial_use_allowed": true,
       "attribution_required": false,
@@ -11,25 +12,27 @@
       "license_url": "https://keithito.com/LJ-Speech-Dataset/",
       "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/ljspeech/medium",
       "sha256": "<fill after download>",
-      "path": "<local path>/en_US-ljspeech-medium.onnx"
+      "path": "voices/en_US-ljspeech-medium.onnx"
     },
     {
-      "id": "en_us_libritts_high_multi",
+      "id": "en_us_ryan_male",
       "language": "en-US",
-      "style": "multi-speaker",
+      "gender": "male",
+      "style": "neutral",
       "sample_rate": 22050,
       "commercial_use_allowed": true,
-      "attribution_required": true,
-      "license_name": "CC BY 4.0 (LibriTTS)",
-      "license_url": "http://www.openslr.org/60/",
-      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts/high",
+      "attribution_required": false,
+      "license_name": "Public Domain (Ryan Speech)",
+      "license_url": "https://github.com/rhasspy/piper/blob/master/VOICES.md",
+      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/ryan/high",
       "sha256": "<fill after download>",
-      "path": "<local path>/en_US-libritts-high.onnx"
+      "path": "voices/en_US-ryan-high.onnx"
     },
     {
-      "id": "el_gr_rapunzelina_low",
+      "id": "el_gr_rapunzelina_female",
       "language": "el-GR",
-      "style": "female-neutral",
+      "gender": "female",
+      "style": "neutral",
       "sample_rate": 16000,
       "commercial_use_allowed": true,
       "attribution_required": false,
@@ -37,7 +40,21 @@
       "license_url": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
       "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/el/el_GR/rapunzelina/low",
       "sha256": "<fill after download>",
-      "path": "<local path>/el_GR-rapunzelina-low.onnx"
+      "path": "voices/el_GR-rapunzelina-low.onnx"
+    },
+    {
+      "id": "el_gr_male_neutral",
+      "language": "el-GR",
+      "gender": "male",
+      "style": "neutral",
+      "sample_rate": 22050,
+      "commercial_use_allowed": true,
+      "attribution_required": false,
+      "license_name": "MIT License (Greek TTS)",
+      "license_url": "https://github.com/rhasspy/piper/blob/master/VOICES.md",
+      "source_url": "https://huggingface.co/rhasspy/piper-voices/tree/main/el/el_GR",
+      "sha256": "<fill after download>",
+      "path": "voices/el_GR-male-medium.onnx"
     }
   ]
 }

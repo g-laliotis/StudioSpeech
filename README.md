@@ -17,8 +17,9 @@ A free, local (offline) Text-to-Speech tool for creating high-quality speech fro
 # Check system requirements
 ./ttscli check
 
-# Convert text to speech
-./ttscli synth --in script.txt --lang en-US --out voice.mp3
+# Convert text to speech with gender selection
+./ttscli synth --in script.txt --lang en-US --gender female --out voice.mp3
+./ttscli synth --in script.txt --lang el-GR --gender male --out voice.mp3
 ```
 
 ## Requirements

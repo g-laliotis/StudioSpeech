@@ -13,6 +13,7 @@ import (
 type Voice struct {
 	ID                   string `json:"id"`
 	Language             string `json:"language"`
+	Gender               string `json:"gender"`
 	Style                string `json:"style"`
 	SampleRate           int    `json:"sample_rate"`
 	CommercialUseAllowed bool   `json:"commercial_use_allowed"`
@@ -101,8 +102,8 @@ func (v *VoiceCatalogAgent) validateVoice(voice *Voice) error {
 	return nil
 }
 
-// SelectVoice chooses appropriate voice based on language and voice ID
-func (v *VoiceCatalogAgent) SelectVoice(language, voiceID string) (*Voice, error) {
+// SelectVoice chooses appropriate voice based on language, voice ID, and gender
+func (v *VoiceCatalogAgent) SelectVoice(language, voiceID, gender string) (*Voice, error) {
 	if v.catalog == nil {
 		return nil, fmt.Errorf("catalog not loaded")
 	}
@@ -117,7 +118,7 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID string) (*Voice, error
 		return nil, fmt.Errorf("voice ID %s not found in catalog", voiceID)
 	}
 	
-	// Auto-select based on language
+	// Auto-select based on language and gender
 	var candidates []Voice
 	
 	// Normalize language code
@@ -132,6 +133,19 @@ func (v *VoiceCatalogAgent) SelectVoice(language, voiceID string) (*Voice, error
 	
 	if len(candidates) == 0 {
 		return nil, fmt.Errorf("no voices found for language %s", language)
+	}
+	
+	// Filter by gender if specified
+	if gender != "auto" && gender != "" {
+		var genderCandidates []Voice
+		for _, voice := range candidates {
+			if voice.Gender == gender {
+				genderCandidates = append(genderCandidates, voice)
+			}
+		}
+		if len(genderCandidates) > 0 {
+			candidates = genderCandidates
+		}
 	}
 	
 	// Prefer higher quality voices (heuristic: higher sample rate)

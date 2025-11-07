@@ -42,12 +42,12 @@ func executeSynthesisPipeline() error {
 		return fmt.Errorf("voice catalog loading failed: %w", err)
 	}
 	
-	selectedVoice, err := voiceAgent.SelectVoice(content.Language, voiceID)
+	selectedVoice, err := voiceAgent.SelectVoice(content.Language, voiceID, gender)
 	if err != nil {
 		return fmt.Errorf("voice selection failed: %w", err)
 	}
 	
-	fmt.Printf("   ✓ Selected voice: %s (%s)\n", selectedVoice.ID, selectedVoice.Style)
+	fmt.Printf("   ✓ Selected voice: %s (%s %s)\n", selectedVoice.ID, selectedVoice.Gender, selectedVoice.Style)
 	
 	// Step 3: Text Normalization
 	fmt.Printf("🔧 Normalizing text...\n")

@@ -98,8 +98,22 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 	// Execute Piper synthesis
 	startTime := time.Now()
 	
-	if err := s.executePiper(cmd, text); err != nil {
-		return nil, fmt.Errorf("piper synthesis failed: %w", err)
+	// Try Piper first, fallback to macOS TTS if Piper fails
+	err := s.executePiper(cmd, text)
+	if err != nil {
+		// Try macOS TTS fallback
+		macTTS := NewMacOSTTSAgent(s.tempDir)
+		if macTTS.IsAvailable() {
+			gender := "female"
+			if params.Speaker > 0 {
+				gender = "male"
+			}
+			if err := macTTS.Synthesize(text, outputPath, gender, normalized.Language); err != nil {
+				return nil, fmt.Errorf("both Piper and macOS TTS failed: piper=%v, macos=%v", err, err)
+			}
+		} else {
+			return nil, fmt.Errorf("piper synthesis failed and no fallback available: %w", err)
+		}
 	}
 	
 	duration := time.Since(startTime)

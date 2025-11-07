@@ -75,7 +75,7 @@ func executeSynthesisPipeline() error {
 	
 	// Initialize synthesis agent
 	synthAgent := agents.NewSynthAgent("piper", tempDir)
-	synthAgent.SetDryRun(true) // Dry run until Piper is available
+	synthAgent.SetDryRun(false) // Use real synthesis with fallback
 	
 	// Set synthesis parameters
 	params := &agents.SynthParams{
@@ -128,7 +128,7 @@ func executeSynthesisPipeline() error {
 	// Step 6: Post-processing
 	fmt.Printf("🎵 Post-processing...\n")
 	postAgent := agents.NewPostProcessAgent("ffmpeg", tempDir)
-	postAgent.SetDryRun(true) // Dry run until FFmpeg available
+	postAgent.SetDryRun(false) // Use real post-processing
 	
 	postResult, err := postAgent.Process(result.OutputPath, outputFile, postParams)
 	if err != nil {

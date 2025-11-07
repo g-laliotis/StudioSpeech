@@ -93,11 +93,68 @@ func executeSynthesisPipeline() error {
 	fmt.Printf("   ✓ Generated audio: %s\n", result.OutputPath)
 	fmt.Printf("   ✓ Sample rate: %d Hz, Channels: %d\n", result.SampleRate, result.Channels)
 	
-	// Step 5: Post-processing (Placeholder)
+	// Step 5: Check Cache
+	fmt.Printf("💾 Checking cache...\n")
+	cacheDir := filepath.Join(os.TempDir(), "studiospeech_cache")
+	cacheAgent := agents.NewCacheAgent(cacheDir)
+	if err := cacheAgent.Initialize(); err != nil {
+		return fmt.Errorf("cache initialization failed: %w", err)
+	}
+	
+	// Generate cache key
+	postParams := &agents.PostProcessParams{
+		Format:       agents.AudioFormat(format),
+		SampleRate:   sampleRate,
+		Bitrate:      bitrate,
+		LoudnessLUFS: -16.0,
+	}
+	
+	cacheKey := cacheAgent.GenerateKey(content, selectedVoice, params, postParams)
+	
+	// Check for cache hit
+	if entry, err := cacheAgent.Get(cacheKey); err == nil && entry != nil {
+		fmt.Printf("   ✅ Cache hit! Using cached audio\n")
+		fmt.Printf("   ✓ Cached file: %s\n", entry.FilePath)
+		
+		// Copy cached file to output location
+		if err := copyFile(entry.FilePath, outputFile); err != nil {
+			return fmt.Errorf("failed to copy cached file: %w", err)
+		}
+		return nil
+	}
+	
+	fmt.Printf("   ⚠️  Cache miss - will synthesize and cache result\n")
+	
+	// Step 6: Post-processing
 	fmt.Printf("🎵 Post-processing...\n")
-	fmt.Printf("   ⚠️  Audio post-processing not yet implemented\n")
+	postAgent := agents.NewPostProcessAgent("ffmpeg", tempDir)
+	postAgent.SetDryRun(true) // Dry run until FFmpeg available
+	
+	postResult, err := postAgent.Process(result.OutputPath, outputFile, postParams)
+	if err != nil {
+		return fmt.Errorf("post-processing failed: %w", err)
+	}
+	
+	fmt.Printf("   ✓ Processed audio: %s\n", postResult.OutputPath)
+	fmt.Printf("   ✓ Format: %s, Sample rate: %d Hz\n", postResult.Format, postResult.SampleRate)
+	
+	// Step 7: Cache result
+	fmt.Printf("💾 Caching result...\n")
+	metadata := map[string]interface{}{
+		"voice":      selectedVoice.ID,
+		"language":   content.Language,
+		"format":     string(postParams.Format),
+		"word_count": content.WordCount,
+	}
+	
+	if err := cacheAgent.Put(cacheKey, postResult.OutputPath, metadata); err != nil {
+		fmt.Printf("   ⚠️  Failed to cache result: %v\n", err)
+	} else {
+		fmt.Printf("   ✓ Result cached for future use\n")
+	}
+	
 	fmt.Printf("   ⚠️  This is a dry-run - no actual audio generated\n")
-	fmt.Printf("   ⚠️  Install Piper TTS to enable real synthesis\n")
+	fmt.Printf("   ⚠️  Install Piper TTS and FFmpeg to enable real synthesis\n")
 	
 	return nil
 }

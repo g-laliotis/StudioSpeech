@@ -68,9 +68,11 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 		return nil, fmt.Errorf("invalid synthesis parameters: %w", err)
 	}
 	
-	// Check if voice model file exists
-	if _, err := os.Stat(voice.Path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("voice model file not found: %s", voice.Path)
+	// Check if voice model file exists (skip in dry-run mode)
+	if !s.dryRun {
+		if _, err := os.Stat(voice.Path); os.IsNotExist(err) {
+			return nil, fmt.Errorf("voice model file not found: %s", voice.Path)
+		}
 	}
 	
 	// Create temporary output file

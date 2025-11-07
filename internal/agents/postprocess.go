@@ -65,9 +65,11 @@ func (p *PostProcessAgent) Process(inputPath, outputPath string, params *PostPro
 		return nil, fmt.Errorf("invalid parameters: %w", err)
 	}
 	
-	// Check input file exists
-	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("input file not found: %s", inputPath)
+	// Check input file exists (skip in dry-run mode)
+	if !p.dryRun {
+		if _, err := os.Stat(inputPath); os.IsNotExist(err) {
+			return nil, fmt.Errorf("input file not found: %s", inputPath)
+		}
 	}
 	
 	// Build FFmpeg command

@@ -64,11 +64,12 @@
 
         <h2>⚡ Quick Start</h2>
         <div class="code">
-# Check system requirements<br>
-./ttscli check<br><br>
-# Convert text to speech with gender selection<br>
-./ttscli synth --in script.txt --lang en-US --gender female --out voice.mp3<br>
-./ttscli synth --in script.txt --lang el-GR --gender male --out voice.mp3
+# Simple commands<br>
+make run "script.txt"          # → script.mp3<br>
+make run-greek "script.txt"    # → Greek female voice<br>
+make run-male "script.txt"     # → Male voice<br><br>
+# Advanced usage<br>
+./bin/ttscli synth --in script.pdf --lang el-GR --gender female --out voice.mp3
         </div>
 
         <h2>🏗️ Architecture</h2>

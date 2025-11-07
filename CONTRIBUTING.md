@@ -29,12 +29,15 @@ make build
 
 ```
 StudioSpeech/
-├── cmd/ttscli/           # CLI application entry point
-├── internal/agents/      # Core TTS pipeline agents
-├── voices/              # Voice model catalog
-├── testdata/            # Test files and samples
+├── .github/             # GitHub templates and workflows
+├── bin/                 # Built binaries (generated)
+├── cmd/ttscli/          # CLI application entry point
 ├── docs/                # Documentation and GitHub Pages
-└── scripts/             # Build and utility scripts
+├── internal/
+│   ├── agents/          # Core TTS pipeline agents
+│   └── version/         # Version management
+├── testdata/samples/    # Test files and samples
+└── voices/              # Voice model catalog
 ```
 
 ## 🧩 Agent Architecture

@@ -267,27 +267,39 @@ StudioSpeech/
 │   │   ├── pages.yml           # GitHub Pages deployment
 │   │   └── test.yml            # CI/CD testing workflow
 │   └── PULL_REQUEST_TEMPLATE.md # Pull request template
+├── bin/
+│   └── ttscli              # Built binary (generated)
 ├── cmd/
 │   └── ttscli/
 │       ├── main.go         # CLI entrypoint
+│       ├── check.go        # System check command
 │       ├── synth.go        # Synthesis command
-│       └── pipeline.go     # Pipeline orchestration
+│       ├── pipeline.go     # Pipeline orchestration
+│       └── utils.go        # CLI utilities
 ├── docs/
 │   ├── .nojekyll           # Bypass Jekyll processing
-│   ├── index.html          # GitHub Pages site
-│   └── README.md           # Documentation
+│   └── index.html          # GitHub Pages site
 ├── internal/
-│   └── agents/
-│       ├── environment.go  # System validation
-│       ├── voice_catalog.go # Voice management
-│       ├── text_ingest.go  # File processing
-│       ├── normalize.go    # Text cleanup
-│       ├── synth.go        # Speech synthesis
-│       ├── macos_tts.go    # macOS TTS integration
-│       ├── postprocess.go  # Audio processing
-│       └── cache.go        # Result caching
+│   ├── agents/
+│   │   ├── cache.go        # Result caching
+│   │   ├── cache_test.go   # Cache tests
+│   │   ├── environment.go  # System validation
+│   │   ├── macos_tts.go    # macOS TTS integration
+│   │   ├── normalize.go    # Text cleanup
+│   │   ├── normalize_test.go # Normalization tests
+│   │   ├── postprocess.go  # Audio processing
+│   │   ├── postprocess_test.go # Post-process tests
+│   │   ├── synth.go        # Speech synthesis
+│   │   ├── synth_test.go   # Synthesis tests
+│   │   ├── text_ingest.go  # File processing
+│   │   ├── text_ingest_test.go # Text ingest tests
+│   │   └── voice_catalog.go # Voice management
+│   └── version/
+│       └── version.go      # Version information
 ├── testdata/
-│   └── samples/            # Sample files for testing
+│   └── samples/
+│       ├── sample.txt      # English sample
+│       └── greek.txt       # Greek sample
 ├── voices/
 │   └── catalog.json        # Voice model catalog
 ├── .gitignore
@@ -295,10 +307,10 @@ StudioSpeech/
 ├── CHANGELOG.md            # Version history
 ├── CODE_OF_CONDUCT.md      # Community guidelines
 ├── CONTRIBUTING.md         # Contribution guidelines
-├── go.mod
+├── go.mod                  # Go module definition
+├── go.sum                  # Go module checksums
 ├── INSTALL.md              # Installation instructions
 ├── LICENSE                 # MIT License
-├── LICENSES.md             # Voice model licensing
 ├── Makefile                # Build automation
 ├── README.md               # Project documentation
 └── SECURITY.md             # Security policy

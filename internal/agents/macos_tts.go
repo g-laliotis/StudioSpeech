@@ -38,9 +38,10 @@ func (m *MacOSTTSAgent) Synthesize(text, outputPath, gender, language string) er
 	// Select voice based on gender and language
 	voice := m.selectVoice(gender, language)
 	
-	// Generate to AIFF first (macOS native format)
+	// Generate to AIFF first (macOS native format) with natural speech rate
 	aiffPath := outputPath + ".aiff"
-	cmd := exec.Command("say", "-v", voice, "-o", aiffPath, text)
+	rate := m.calculateSpeechRate(language)
+	cmd := exec.Command("say", "-v", voice, "-r", fmt.Sprintf("%.0f", rate), "-o", aiffPath, text)
 	
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -77,6 +78,17 @@ func (m *MacOSTTSAgent) selectVoice(gender, language string) string {
 		return "Samantha"  // Default female voice
 	default:
 		return "Samantha"  // Default to female
+	}
+}
+
+// calculateSpeechRate returns optimal speech rate for natural delivery
+func (m *MacOSTTSAgent) calculateSpeechRate(language string) float64 {
+	// Slower rate for better pronunciation and natural pauses
+	switch language {
+	case "el-GR":
+		return 160  // Slightly slower for Greek
+	default:
+		return 175  // Natural English rate
 	}
 }
 

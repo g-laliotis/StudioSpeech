@@ -152,29 +152,58 @@ func (n *NormalizeAgent) expandNumbers(text, language string) string {
 	return text
 }
 
-// splitIntoSentences breaks text into individual sentences
+// splitIntoSentences breaks text into individual sentences with proper punctuation
 func (n *NormalizeAgent) splitIntoSentences(text string) []string {
-	// Simple sentence splitting on common punctuation
-	sentenceRegex := regexp.MustCompile(`[.!?]+\s+`)
+	// Enhanced sentence splitting with better punctuation handling
+	sentenceRegex := regexp.MustCompile(`([.!?]+)\s+`)
 	
-	// Split and clean up
+	// Split while preserving punctuation
 	parts := sentenceRegex.Split(text, -1)
+	punctuation := sentenceRegex.FindAllString(text, -1)
+	
 	var sentences []string
 	
-	for _, part := range parts {
+	for i, part := range parts {
 		sentence := strings.TrimSpace(part)
 		if sentence != "" {
-			// Ensure sentence ends with punctuation
-			if !strings.HasSuffix(sentence, ".") && 
-			   !strings.HasSuffix(sentence, "!") && 
-			   !strings.HasSuffix(sentence, "?") {
-				sentence += "."
+			// Add back the original punctuation if available
+			if i < len(punctuation) {
+				origPunct := strings.TrimSpace(punctuation[i])
+				sentence += origPunct
+			} else {
+				// Ensure sentence ends with punctuation
+				if !strings.HasSuffix(sentence, ".") && 
+				   !strings.HasSuffix(sentence, "!") && 
+				   !strings.HasSuffix(sentence, "?") {
+					sentence += "."
+				}
 			}
+			
+			// Add prosody improvements
+			sentence = n.improveProsody(sentence)
 			sentences = append(sentences, sentence)
 		}
 	}
 	
 	return sentences
+}
+
+// improveProsody adds natural speech patterns
+func (n *NormalizeAgent) improveProsody(sentence string) string {
+	// Add pauses after commas for better rhythm
+	sentence = regexp.MustCompile(`,\s*`).ReplaceAllString(sentence, ", ")
+	
+	// Add emphasis on colons and semicolons
+	sentence = regexp.MustCompile(`:\s*`).ReplaceAllString(sentence, ": ")
+	sentence = regexp.MustCompile(`;\s*`).ReplaceAllString(sentence, "; ")
+	
+	// Handle parenthetical expressions
+	sentence = regexp.MustCompile(`\(([^)]+)\)`).ReplaceAllString(sentence, " ($1) ")
+	
+	// Clean up multiple spaces
+	sentence = regexp.MustCompile(`\s+`).ReplaceAllString(sentence, " ")
+	
+	return strings.TrimSpace(sentence)
 }
 
 // ProcessPauseMarkup handles optional pause markup like [PAUSE=300ms]

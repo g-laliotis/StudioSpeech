@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/ledongthuc/pdf"
 	"github.com/unidoc/unioffice/document"
 )
 
@@ -28,7 +29,7 @@ func NewTextIngestAgent() *TextIngestAgent {
 	return &TextIngestAgent{}
 }
 
-// ProcessFile reads and processes a text file (.txt or .docx)
+// ProcessFile reads and processes a text file (.txt, .docx, or .pdf)
 func (t *TextIngestAgent) ProcessFile(filePath string) (*TextContent, error) {
 	// Validate file exists
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
@@ -45,8 +46,10 @@ func (t *TextIngestAgent) ProcessFile(filePath string) (*TextContent, error) {
 		content, err = t.processTxtFile(filePath)
 	case ".docx":
 		content, err = t.processDocxFile(filePath)
+	case ".pdf":
+		content, err = t.processPdfFile(filePath)
 	default:
-		return nil, fmt.Errorf("unsupported file type: %s (supported: .txt, .docx)", ext)
+		return nil, fmt.Errorf("unsupported file type: %s (supported: .txt, .docx, .pdf)", ext)
 	}
 	
 	if err != nil {
@@ -115,6 +118,62 @@ func (t *TextIngestAgent) processDocxFile(filePath string) (*TextContent, error)
 	
 	if len(paragraphs) == 0 {
 		return nil, fmt.Errorf("no text content found in DOCX file")
+	}
+	
+	return &TextContent{
+		Paragraphs: paragraphs,
+		Language:   t.detectLanguage(allText.String()),
+	}, nil
+}
+
+// processPdfFile reads and processes a PDF document
+func (t *TextIngestAgent) processPdfFile(filePath string) (*TextContent, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open PDF file: %w", err)
+	}
+	defer file.Close()
+	
+	// Get file info for PDF reader
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get PDF file info: %w", err)
+	}
+	
+	// Read PDF content
+	reader, err := pdf.NewReader(file, fileInfo.Size())
+	if err != nil {
+		return nil, fmt.Errorf("failed to create PDF reader: %w", err)
+	}
+	
+	var paragraphs []string
+	var allText strings.Builder
+	
+	// Extract text from all pages
+	for i := 1; i <= reader.NumPage(); i++ {
+		page := reader.Page(i)
+		if page.V.IsNull() {
+			continue
+		}
+		
+		// Get page content
+		pageText, err := page.GetPlainText(nil)
+		if err != nil {
+			continue // Skip pages with extraction errors
+		}
+		
+		// Clean and process page text
+		pageText = strings.TrimSpace(pageText)
+		if pageText != "" {
+			// Split page into paragraphs
+			pageParagraphs := t.splitIntoParagraphs(pageText)
+			paragraphs = append(paragraphs, pageParagraphs...)
+			allText.WriteString(pageText + " ")
+		}
+	}
+	
+	if len(paragraphs) == 0 {
+		return nil, fmt.Errorf("no text content found in PDF file")
 	}
 	
 	return &TextContent{

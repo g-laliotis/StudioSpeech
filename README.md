@@ -9,7 +9,7 @@ A free, local (offline) Text-to-Speech tool for creating high-quality speech fro
 - **Multi-language**: Supports Greek (el-GR) and English (en-US/UK)
 - **High Quality**: Natural-sounding speech suitable for YouTube
 - **Multiple Formats**: Outputs WAV (48kHz mono) and MP3 (192kbps)
-- **Input Support**: Reads .txt and .docx files with Unicode support
+- **Input Support**: Reads .txt, .docx, and .pdf files with Unicode support
 
 ## Quick Start
 

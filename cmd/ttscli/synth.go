@@ -12,11 +12,12 @@ import (
 var synthCmd = &cobra.Command{
 	Use:   "synth",
 	Short: "Synthesize speech from text files",
-	Long: `Convert text files (.txt or .docx) to high-quality speech audio.
+	Long: `Convert text files (.txt, .docx, or .pdf) to high-quality speech audio.
 
 Examples:
   ttscli synth --in script.txt --lang en-US --gender female --out voice.mp3
   ttscli synth --in document.docx --lang el-GR --gender male --format wav
+  ttscli synth --in document.pdf --lang en-US --gender female --out speech.mp3
   ttscli synth --in story.txt --speed 1.05 --gender auto --out narration.mp3`,
 	Run: runSynth,
 }
@@ -125,8 +126,8 @@ func validateInputFile(path string) error {
 	}
 	
 	ext := strings.ToLower(filepath.Ext(path))
-	if ext != ".txt" && ext != ".docx" {
-		return fmt.Errorf("unsupported file type: %s (supported: .txt, .docx)", ext)
+	if ext != ".txt" && ext != ".docx" && ext != ".pdf" {
+		return fmt.Errorf("unsupported file type: %s (supported: .txt, .docx, .pdf)", ext)
 	}
 	
 	// TODO: Check if file exists

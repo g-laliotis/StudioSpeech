@@ -83,12 +83,12 @@ func (m *MacOSTTSAgent) selectVoice(gender, language string) string {
 
 // calculateSpeechRate returns optimal speech rate for natural delivery
 func (m *MacOSTTSAgent) calculateSpeechRate(language string) float64 {
-	// Slower rate for better pronunciation and natural pauses
+	// Much slower rate for clear pronunciation and natural pauses
 	switch language {
 	case "el-GR":
-		return 160 // Slightly slower for Greek
+		return 140 // Slower for Greek clarity
 	default:
-		return 175 // Natural English rate
+		return 150 // Slower English rate for better comprehension
 	}
 }
 

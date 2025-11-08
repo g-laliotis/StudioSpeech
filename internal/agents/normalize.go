@@ -68,7 +68,7 @@ func (n *NormalizeAgent) Normalize(content *TextContent) (*NormalizedText, error
 
 	var allSentences []string
 
-	for _, paragraph := range content.Paragraphs {
+	for i, paragraph := range content.Paragraphs {
 		// Clean and normalize the paragraph
 		cleaned := n.cleanText(paragraph)
 
@@ -82,6 +82,12 @@ func (n *NormalizeAgent) Normalize(content *TextContent) (*NormalizedText, error
 		sentences := n.splitIntoSentences(withNumbers)
 
 		allSentences = append(allSentences, sentences...)
+
+		// Add paragraph break (longer pause) between paragraphs
+		if i < len(content.Paragraphs)-1 && len(sentences) > 0 {
+			// Add a pause sentence between paragraphs
+			allSentences = append(allSentences, "...")
+		}
 	}
 
 	return &NormalizedText{

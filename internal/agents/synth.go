@@ -78,8 +78,8 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 	// Create temporary output file
 	outputPath := filepath.Join(s.tempDir, fmt.Sprintf("synth_%d.wav", time.Now().UnixNano()))
 
-	// Combine all sentences into single text
-	text := strings.Join(normalized.Sentences, " ")
+	// Combine sentences with proper pauses between them
+	text := strings.Join(normalized.Sentences, ". ")
 
 	// Build Piper command
 	cmd := s.buildPiperCommand(voice.Path, outputPath, params)

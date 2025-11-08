@@ -68,8 +68,8 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 		return nil, fmt.Errorf("invalid synthesis parameters: %w", err)
 	}
 
-	// Check if voice model file exists (skip in dry-run mode)
-	if !s.dryRun {
+	// Check if voice model file exists (skip for macOS voices and dry-run mode)
+	if !s.dryRun && !s.isMacOSVoice(voice) {
 		if _, err := os.Stat(voice.Path); os.IsNotExist(err) {
 			return nil, fmt.Errorf("voice model file not found: %s", voice.Path)
 		}
@@ -95,24 +95,36 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 		}, nil
 	}
 
-	// Execute Piper synthesis
+	// Execute synthesis
 	startTime := time.Now()
 
-	// Try Piper first, fallback to macOS TTS if Piper fails
-	err := s.executePiper(cmd, text)
-	if err != nil {
-		// Try macOS TTS fallback
+	// Use macOS TTS for macOS voices, Piper for others
+	if s.isMacOSVoice(voice) {
 		macTTS := NewMacOSTTSAgent(s.tempDir)
 		if macTTS.IsAvailable() {
-			gender := "female"
-			if params.Speaker > 0 {
-				gender = "male"
-			}
-			if err := macTTS.Synthesize(text, outputPath, gender, normalized.Language); err != nil {
-				return nil, fmt.Errorf("both Piper and macOS TTS failed: piper=%v, macos=%v", err, err)
+			if err := macTTS.Synthesize(text, outputPath, voice.Gender, normalized.Language); err != nil {
+				return nil, fmt.Errorf("macOS TTS synthesis failed: %w", err)
 			}
 		} else {
-			return nil, fmt.Errorf("piper synthesis failed and no fallback available: %w", err)
+			return nil, fmt.Errorf("macOS TTS not available")
+		}
+	} else {
+		// Try Piper first, fallback to macOS TTS if Piper fails
+		err := s.executePiper(cmd, text)
+		if err != nil {
+			// Try macOS TTS fallback
+			macTTS := NewMacOSTTSAgent(s.tempDir)
+			if macTTS.IsAvailable() {
+				gender := "female"
+				if params.Speaker > 0 {
+					gender = "male"
+				}
+				if err := macTTS.Synthesize(text, outputPath, gender, normalized.Language); err != nil {
+					return nil, fmt.Errorf("both Piper and macOS TTS failed: piper=%v, macos=%v", err, err)
+				}
+			} else {
+				return nil, fmt.Errorf("piper synthesis failed and no fallback available: %w", err)
+			}
 		}
 	}
 
@@ -222,6 +234,13 @@ func (s *SynthAgent) GetCommandLine(voice *Voice, params *SynthParams, outputPat
 
 	cmd := s.buildPiperCommand(voice.Path, outputPath, params)
 	return strings.Join(append([]string{cmd.Path}, cmd.Args[1:]...), " ")
+}
+
+// isMacOSVoice checks if a voice is a macOS system voice
+func (s *SynthAgent) isMacOSVoice(voice *Voice) bool {
+	// macOS voices have simple names like "Alex", "Samantha", "Melina"
+	// and don't have file extensions
+	return !strings.Contains(voice.Path, "/") && !strings.Contains(voice.Path, ".")
 }
 
 // CleanupTempFiles removes temporary synthesis files

@@ -1,0 +1,7 @@
+Welcome to StudioSpeech testing. This is a sample document for testing text-to-speech conversion.
+
+It contains multiple sentences with proper punctuation! How does the speech quality sound? Let me know your feedback.
+
+This paragraph tests special characters: Dr. Smith's research shows that 50% of users prefer natural-sounding voices. The cost is $19.99 per month.
+
+Testing numbers: In 2024, we processed 1,000+ documents successfully. The system runs at 175 WPM for optimal clarity.

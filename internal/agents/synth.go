@@ -78,8 +78,15 @@ func (s *SynthAgent) Synthesize(normalized *NormalizedText, voice *Voice, params
 	// Create temporary output file
 	outputPath := filepath.Join(s.tempDir, fmt.Sprintf("synth_%d.wav", time.Now().UnixNano()))
 
-	// Combine sentences with proper pauses between them
-	text := strings.Join(normalized.Sentences, ". ")
+	// Process sentences individually for better prosody
+	var text string
+	if len(normalized.Sentences) == 1 {
+		// Single sentence - process normally
+		text = normalized.Sentences[0]
+	} else {
+		// Multiple sentences - process with pauses
+		return s.synthesizeWithPauses(normalized, voice, params, outputPath)
+	}
 
 	// Build Piper command
 	cmd := s.buildPiperCommand(voice.Path, outputPath, params)
@@ -241,6 +248,106 @@ func (s *SynthAgent) isMacOSVoice(voice *Voice) bool {
 	// macOS voices have simple names like "Alex", "Samantha", "Melina"
 	// and don't have file extensions
 	return !strings.Contains(voice.Path, "/") && !strings.Contains(voice.Path, ".")
+}
+
+// synthesizeWithPauses processes sentences individually with natural pauses
+func (s *SynthAgent) synthesizeWithPauses(normalized *NormalizedText, voice *Voice, params *SynthParams, outputPath string) (*SynthResult, error) {
+	startTime := time.Now()
+	var audioFiles []string
+
+	// Process each sentence separately
+	for i, sentence := range normalized.Sentences {
+		// Skip empty sentences and pause markers
+		if strings.TrimSpace(sentence) == "" || strings.Contains(sentence, "...") {
+			continue
+		}
+
+		// Create temporary file for this sentence
+		sentenceFile := filepath.Join(s.tempDir, fmt.Sprintf("sentence_%d_%d.wav", time.Now().UnixNano(), i))
+
+		// Synthesize individual sentence
+		if s.isMacOSVoice(voice) {
+			macTTS := NewMacOSTTSAgent(s.tempDir)
+			if err := macTTS.Synthesize(sentence, sentenceFile, voice.Gender, normalized.Language); err != nil {
+				return nil, fmt.Errorf("sentence %d synthesis failed: %w", i, err)
+			}
+		} else {
+			// Piper TTS processing would go here
+			return nil, fmt.Errorf("piper TTS not implemented for sentence-by-sentence processing")
+		}
+
+		audioFiles = append(audioFiles, sentenceFile)
+	}
+
+	// Combine audio files with pauses using FFmpeg
+	if err := s.combineAudioWithPauses(audioFiles, outputPath); err != nil {
+		return nil, fmt.Errorf("failed to combine audio files: %w", err)
+	}
+
+	// Clean up temporary sentence files
+	for _, file := range audioFiles {
+		os.Remove(file)
+	}
+
+	duration := time.Since(startTime)
+
+	// Get output file info
+	fileInfo, err := os.Stat(outputPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get output file info: %w", err)
+	}
+
+	return &SynthResult{
+		OutputPath: outputPath,
+		Duration:   duration,
+		SampleRate: voice.SampleRate,
+		Channels:   1,
+		FileSize:   fileInfo.Size(),
+	}, nil
+}
+
+// combineAudioWithPauses uses FFmpeg to combine audio files with natural pauses
+func (s *SynthAgent) combineAudioWithPauses(audioFiles []string, outputPath string) error {
+	if len(audioFiles) == 0 {
+		return fmt.Errorf("no audio files to combine")
+	}
+
+	if len(audioFiles) == 1 {
+		// Single file - just copy it
+		return exec.Command("cp", audioFiles[0], outputPath).Run()
+	}
+
+	// Create silence file for pauses (0.8 seconds)
+	silenceFile := filepath.Join(s.tempDir, "silence.wav")
+	silenceCmd := exec.Command("ffmpeg", "-f", "lavfi", "-i", "anullsrc=r=22050:cl=mono", "-t", "0.8", "-y", silenceFile)
+	if err := silenceCmd.Run(); err != nil {
+		return fmt.Errorf("failed to create silence: %w", err)
+	}
+	defer os.Remove(silenceFile)
+
+	// Build FFmpeg filter for concatenation with pauses
+	var inputs []string
+	var filterParts []string
+
+	for i, file := range audioFiles {
+		inputs = append(inputs, "-i", file)
+		filterParts = append(filterParts, fmt.Sprintf("[%d:0]", i*2))
+		
+		if i < len(audioFiles)-1 {
+			// Add silence between sentences
+			inputs = append(inputs, "-i", silenceFile)
+			filterParts = append(filterParts, fmt.Sprintf("[%d:0]", i*2+1))
+		}
+	}
+
+	// Build complete FFmpeg command
+	args := []string{"-y"}
+	args = append(args, inputs...)
+	args = append(args, "-filter_complex", strings.Join(filterParts, "")+"concat=n="+fmt.Sprintf("%d", len(filterParts))+":v=0:a=1[out]")
+	args = append(args, "-map", "[out]", outputPath)
+
+	cmd := exec.Command("ffmpeg", args...)
+	return cmd.Run()
 }
 
 // CleanupTempFiles removes temporary synthesis files

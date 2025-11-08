@@ -85,8 +85,8 @@ func (n *NormalizeAgent) Normalize(content *TextContent) (*NormalizedText, error
 
 		// Add paragraph break (longer pause) between paragraphs
 		if i < len(content.Paragraphs)-1 && len(sentences) > 0 {
-			// Add a pause sentence between paragraphs
-			allSentences = append(allSentences, "...")
+			// Add longer pause between paragraphs
+			allSentences = append(allSentences, "... ... ...")
 		}
 	}
 

@@ -1,34 +1,46 @@
 {
   "voices": [
     {
-      "voice_id": "en_us_samantha",
-      "name": "Samantha (English Female)",
+      "id": "en_us_samantha",
       "language": "en-US",
       "gender": "female",
+      "style": "neutral",
+      "sample_rate": 22050,
       "commercial_use_allowed": true,
-      "quality_rating": 5,
-      "engine": "macos",
-      "system_voice": "Samantha"
+      "attribution_required": false,
+      "license_name": "macOS Built-in Voice",
+      "license_url": "https://www.apple.com/legal/sla/",
+      "source_url": "macOS System",
+      "sha256": "",
+      "path": "Samantha"
     },
     {
-      "voice_id": "en_us_alex",
-      "name": "Alex (English Male)",
+      "id": "en_us_alex",
       "language": "en-US",
       "gender": "male",
+      "style": "neutral",
+      "sample_rate": 22050,
       "commercial_use_allowed": true,
-      "quality_rating": 5,
-      "engine": "macos",
-      "system_voice": "Alex"
+      "attribution_required": false,
+      "license_name": "macOS Built-in Voice",
+      "license_url": "https://www.apple.com/legal/sla/",
+      "source_url": "macOS System",
+      "sha256": "",
+      "path": "Alex"
     },
     {
-      "voice_id": "el_gr_melina",
-      "name": "Melina (Greek Female)",
+      "id": "el_gr_melina",
       "language": "el-GR",
       "gender": "female",
+      "style": "neutral",
+      "sample_rate": 22050,
       "commercial_use_allowed": true,
-      "quality_rating": 5,
-      "engine": "macos",
-      "system_voice": "Melina"
+      "attribution_required": false,
+      "license_name": "macOS Built-in Voice",
+      "license_url": "https://www.apple.com/legal/sla/",
+      "source_url": "macOS System",
+      "sha256": "",
+      "path": "Melina"
     }
   ]
 }

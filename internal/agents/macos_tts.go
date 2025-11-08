@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"strings"
 )
 
 // MacOSTTSAgent provides fallback TTS using macOS built-in voices
@@ -41,7 +42,10 @@ func (m *MacOSTTSAgent) Synthesize(text, outputPath, gender, language string) er
 	// Generate to AIFF first (macOS native format) with natural speech rate
 	aiffPath := outputPath + ".aiff"
 	rate := m.calculateSpeechRate(language)
-	cmd := exec.Command("say", "-v", voice, "-r", fmt.Sprintf("%.0f", rate), "-o", aiffPath, text)
+	
+	// Use stdin to avoid command line parsing issues with special characters
+	cmd := exec.Command("say", "-v", voice, "-r", fmt.Sprintf("%.0f", rate), "-o", aiffPath)
+	cmd.Stdin = strings.NewReader(text)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {

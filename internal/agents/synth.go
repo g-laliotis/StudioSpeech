@@ -332,7 +332,7 @@ func (s *SynthAgent) combineAudioWithPauses(audioFiles []string, outputPath stri
 	for i, file := range audioFiles {
 		inputs = append(inputs, "-i", file)
 		filterParts = append(filterParts, fmt.Sprintf("[%d:0]", i*2))
-		
+
 		if i < len(audioFiles)-1 {
 			// Add silence between sentences
 			inputs = append(inputs, "-i", silenceFile)

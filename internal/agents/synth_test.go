@@ -117,7 +117,7 @@ func TestSynthAgent_DryRun(t *testing.T) {
 	agent.SetDryRun(true)
 
 	normalized := &NormalizedText{
-		Sentences: []string{"Hello world.", "This is a test."},
+		Sentences: []string{"Hello world test sentence."},
 		Language:  "en-US",
 	}
 

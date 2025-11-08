@@ -108,9 +108,9 @@ make run "script.txt"          # → script.mp3
 make run "document.pdf"        # → document.mp3
 
 # Language-specific
-make run-greek "script.txt"    # → Greek female voice
-make run-male "script.txt"     # → Male voice
-make run-female "script.txt"   # → Female voice
+make run-greek "script.txt"    # → Greek voice (Melina)
+make run-male "script.txt"     # → Male voice (Alex for English, Melina for Greek)
+make run-female "script.txt"   # → Female voice (Samantha for English, Melina for Greek)
 ```
 
 **Advanced Usage**

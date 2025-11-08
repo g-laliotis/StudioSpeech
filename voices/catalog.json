@@ -41,6 +41,20 @@
       "source_url": "macOS System",
       "sha256": "",
       "path": "Melina"
+    },
+    {
+      "id": "el_gr_melina_male",
+      "language": "el-GR",
+      "gender": "male",
+      "style": "neutral",
+      "sample_rate": 22050,
+      "commercial_use_allowed": true,
+      "attribution_required": false,
+      "license_name": "macOS Built-in Voice (Melina as fallback)",
+      "license_url": "https://www.apple.com/legal/sla/",
+      "source_url": "macOS System",
+      "sha256": "",
+      "path": "Melina"
     }
   ]
 }

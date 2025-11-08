@@ -72,7 +72,7 @@ go build -o ttscli.exe ./cmd/ttscli
 
 | Platform | Primary TTS | Voice Quality | Greek Support |
 |----------|-------------|---------------|---------------|
-| **macOS** | Built-in `say` | ⭐⭐⭐⭐⭐ | ✅ Native (Melina) |
+| **macOS** | Built-in `say` | ⭐⭐⭐⭐⭐ | ✅ Native (Melina female only) |
 | **Linux** | Built-in TTS | ⭐⭐⭐ | ⚠️ Limited |
 | **Windows** | SAPI | ⭐⭐⭐ | ⚠️ Limited |
 
